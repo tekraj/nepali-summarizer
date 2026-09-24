@@ -1,0 +1,22 @@
+# Project configuration
+# Update values as the model and dataset pipeline are implemented.
+
+project:
+  name: nepali-summarizer
+  version: 0.1.0
+
+training:
+  batch_size: 16
+  epochs: 10
+  learning_rate: 0.0001
+
+data:
+  max_sequence_length: 512
+  source_dir: data/raw
+  processed_dir: data/processed
+
+model:
+  d_model: 256
+  num_heads: 8
+  num_layers: 6
+  dropout: 0.1

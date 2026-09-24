@@ -1,0 +1,1 @@
+"""Nepali summarization project package."""
