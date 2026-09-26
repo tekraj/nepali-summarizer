@@ -1,22 +1,31 @@
 # Project configuration
-# Update values as the model and dataset pipeline are implemented.
+# Paths are relative to the project root.
 
 project:
   name: nepali-summarizer
   version: 0.1.0
 
 training:
-  batch_size: 16
+  # B. Every block caches its activations for backprop; the attention weights alone are
+  # B x 8 x 512 x 512 floats per block, so B=16 needs several GB of RAM. Raise if you have it.
+  batch_size: 4
   epochs: 10
   learning_rate: 0.0001
+  max_grad_norm: 1.0
+  mlm_probability: 0.15   # fraction of real tokens hidden behind <mask> each step
+  seed: 42
+  checkpoint_dir: checkpoints
 
 data:
-  max_sequence_length: 512
+  max_sequence_length: 512   # T
   source_dir: data/raw
+  cleaned_dir: data/cleaned
   processed_dir: data/processed
+  vocab_dir: data/nepali_vocab_output   # vocab.json + merges.txt from train-nepali-bpe
 
 model:
-  d_model: 256
-  num_heads: 8
-  num_layers: 6
-  dropout: 0.1
+  d_model: 512      # D
+  num_heads: 8      # H  (Dh = D / H = 64)
+  num_layers: 6     # N stacked EncoderBlocks
+  d_ff: 2048        # D_ff = 4 * D
+  tie_weights: false

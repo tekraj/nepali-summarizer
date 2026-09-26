@@ -44,3 +44,27 @@ Without PyTorch's Autograd, you must manually calculate the chain rule derivativ
 *   **Batching & Memory:** NumPy executes on the CPU by default. Processing 200,000 documents requires writing a custom data loader that yields mini-batches (e.g., 16 or 32 sequences at a time) to avoid RAM exhaustion.
 *   **Autoregressive Generation:** For inference, the model cannot output the summary in one pass. Write a decoding loop that feeds the source document into the encoder once, then starts the decoder with a `<BOS>` (Begin of Sequence) token.
 *   **Search Strategy:** At each step, take the NumPy array of output probabilities. Implement either Greedy Search (taking the `np.argmax` of the highest probability token) or a Beam Search algorithm to maintain the top $k$ most likely sequences until the model outputs an `<EOS>` (End of Sequence) token.
+
+## Project Setup and Commands
+
+Install the project and its dependencies in editable mode:
+
+```bash
+python -m pip install -e .
+```
+
+Then run the installed cleaning command:
+
+```bash
+clean-data
+```
+
+From the project root, modules can also be run without installation:
+
+```bash
+python -m scripts.clean_data
+python -m scripts.preprocess_data
+python -m scripts.train_model
+python -m scripts.infer
+python -m src.main
+```
