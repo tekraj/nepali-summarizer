@@ -5,7 +5,6 @@ Uses direct PyTorch model.generate() batching to bypass pipeline task key errors
 
 import re
 from pathlib import Path
-import torch
 from contextlib import nullcontext
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
@@ -51,6 +50,16 @@ def summarize_files_batch(
     summary_dir.mkdir(parents=True, exist_ok=True)
 
     file_paths = [Path(f) for f in files]
+
+    # Import torch lazily so notebooks or environments without torch can import
+    # this module without immediately failing. An explicit, helpful error will
+    # be raised when attempting to run the summarization.
+    try:
+        import torch
+    except Exception as exc:  # pragma: no cover - runtime environment dependent
+        raise RuntimeError(
+            "PyTorch is required to run summarization. Install torch in your environment (for Colab: `pip install -q torch torchvision --extra-index-url https://download.pytorch.org/whl/cu118`)"
+        ) from exc
 
     # Coerce optional parameters to defaults when called from CLI
     if model_name is None:

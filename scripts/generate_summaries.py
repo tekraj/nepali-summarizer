@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 from pathlib import Path
-from src.data_preprocessing.summarizer import summarize_files_batch
+from typing import Optional, Union
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CLEANED_DIR = PROJECT_ROOT / "data" / "cleaned"
@@ -44,15 +44,64 @@ def main() -> None:
         print(f"All files in {cleaned_dir} already summarized in {summary_dir}")
         return
 
-    summarize_files_batch(
-        files=unsummarized,
+    run_summarizer(
+        model=args.model,
+        batch_size=args.batch_size,
+        tokenizer_max_len=args.tokenizer_max_len,
+        generate_max_len=args.generate_max_len,
+        cleaned_dir=cleaned_dir,
         summary_dir=summary_dir,
-        model_name=args.model if args.model else None,
-        batch_size=args.batch_size if args.batch_size else None,
-        max_length=args.tokenizer_max_len if args.tokenizer_max_len else None,
-        generate_max_length=args.generate_max_len if args.generate_max_len else None,
+        force=args.force,
     )
 
 
-if __name__ == "__main__":
-    main()
+def run_summarizer(
+    model: Optional[str] = None,
+    batch_size: Optional[int] = None,
+    tokenizer_max_len: Optional[int] = None,
+    generate_max_len: Optional[int] = None,
+    cleaned_dir: Optional[Union[Path, str]] = None,
+    summary_dir: Optional[Union[Path, str]] = None,
+    force: bool = False,
+):
+    """Programmatic entrypoint suitable for notebooks.
+
+    Parameters map directly to the CLI arguments from `main()`; pass None to use
+    the summarizer defaults.
+    """
+    # import summarizer lazily to avoid hard dependency at import time
+    try:
+        from src.data_preprocessing.summarizer import summarize_files_batch
+    except Exception as exc:  # pragma: no cover - runtime environment dependent
+        raise RuntimeError(
+            "Missing runtime dependencies: install `torch` and `transformers` in the environment.\n"
+            "Colab example: `!pip install -q torch transformers sentencepiece`"
+        ) from exc
+
+    cleaned = Path(cleaned_dir) if cleaned_dir else CLEANED_DIR
+    summary = Path(summary_dir) if summary_dir else SUMMARY_DIR
+
+    files = sorted(cleaned.glob("*.txt"))
+    if not files:
+        print(f"No .txt files found in {cleaned}")
+        return
+
+    if force:
+        unsummarized = files
+    else:
+        unsummarized = [
+            f for f in files if not (summary / f"{f.stem}-summary.txt").exists()
+        ]
+
+    if not unsummarized:
+        print(f"All files in {cleaned} already summarized in {summary}")
+        return
+
+    summarize_files_batch(
+        files=unsummarized,
+        summary_dir=summary,
+        model_name=model,
+        batch_size=batch_size,
+        max_length=tokenizer_max_len,
+        generate_max_length=generate_max_len,
+    )
