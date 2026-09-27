@@ -73,6 +73,12 @@ def save_cleaned_text(cleaned_text: str, output_path: str | Path) -> None:
     """Save the cleaned text to a specified file path."""
     Path(output_path).write_text(cleaned_text, encoding="utf-8")
 
+
+def contains_english(text: str) -> bool:
+    """Check if the text contains any English alphabets using regex."""
+    return bool(re.search(r'[a-zA-Z]', text))
+
+
 def process_and_save_cleaned_text(input_path: str | Path, output_path: str | Path) -> None:
     """Clean every text file in an input directory into an output directory."""
     input_files = get_all_raw_files(input_path)
@@ -81,5 +87,10 @@ def process_and_save_cleaned_text(input_path: str | Path, output_path: str | Pat
 
     for input_file in input_files:
         raw_text = text_to_unicode(input_file)
+        
+        # Skip this file if it contains English content
+        if contains_english(raw_text):
+            continue
+            
         cleaned_text = clean_text(raw_text)
         save_cleaned_text(cleaned_text, output_dir / input_file.name)

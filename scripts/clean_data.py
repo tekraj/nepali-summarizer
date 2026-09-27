@@ -6,7 +6,7 @@ from src.data_preprocessing.text_cleaning_pipeline import process_and_save_clean
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DATA_DIR = PROJECT_ROOT / "data" / "raw"
+DATA_DIR = PROJECT_ROOT / "data" / "raw_news"
 CLEANED_DIR = PROJECT_ROOT / "data" / "cleaned"
 def main() -> None:
     """Clean raw text files and save them under the project data directory."""
