@@ -1,12 +1,12 @@
 """Stateless math helpers shared by the Transformer layers."""
 
-import numpy as np
+import cupy as cp
 
 from src.tensor_types import FloatArray
 
 
 def stable_softmax(x: FloatArray, axis: int = -1) -> FloatArray:
-    """Softmax that subtracts the row max first so np.exp never overflows.
+    """Softmax that subtracts the row max first so cp.exp never overflows.
 
     Args:
         x: Any shape, e.g. attention scores (B, h, T, T) or logits (N, V).
@@ -14,8 +14,8 @@ def stable_softmax(x: FloatArray, axis: int = -1) -> FloatArray:
     Returns:
         Same shape as ``x``; values along ``axis`` are >= 0 and sum to 1.0.
     """
-    exp_x = np.exp(x - np.max(x, axis=axis, keepdims=True))
-    return exp_x / np.sum(exp_x, axis=axis, keepdims=True)
+    exp_x = cp.exp(x - cp.max(x, axis=axis, keepdims=True))
+    return exp_x / cp.sum(exp_x, axis=axis, keepdims=True)
 
 
 def matmul_weight_grad(x: FloatArray, d_out: FloatArray) -> FloatArray:

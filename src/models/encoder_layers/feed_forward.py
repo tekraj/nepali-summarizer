@@ -3,7 +3,7 @@
     [B, T, D=512] ──W1, b1──> [B, T, D_ff=2048] ──ReLU──> [B, T, 2048] ──W2, b2──> [B, T, 512]
 """
 
-import numpy as np
+import cupy as cp
 
 from .functional import matmul_weight_grad
 from src.tensor_types import FloatArray
@@ -25,18 +25,18 @@ class PositionwiseFeedForward:
         self.d_ff = d_ff
 
         # Step 1 parameters — up-projection D -> D_ff
-        self.W1 = np.random.normal(0, 0.02, (d_model, d_ff)).astype(np.float32)  # [512, 2048]
-        self.b1 = np.zeros(d_ff, dtype=np.float32)  # [2048]
+        self.W1 = cp.random.normal(0, 0.02, (d_model, d_ff)).astype(cp.float32)  # [512, 2048]
+        self.b1 = cp.zeros(d_ff, dtype=cp.float32)  # [2048]
         # Step 3 parameters — down-projection D_ff -> D
-        self.W2 = np.random.normal(0, 0.02, (d_ff, d_model)).astype(np.float32)  # [2048, 512]
-        self.b2 = np.zeros(d_model, dtype=np.float32)  # [512]
+        self.W2 = cp.random.normal(0, 0.02, (d_ff, d_model)).astype(cp.float32)  # [2048, 512]
+        self.b2 = cp.zeros(d_model, dtype=cp.float32)  # [512]
 
         self.grads: dict[str, FloatArray] = {}
         self.cache: dict[str, FloatArray] = {}
 
     def relu(self, x: FloatArray) -> FloatArray:
         """Step 2 — zero out negatives; without it W1 and W2 would collapse into one linear layer."""
-        return np.maximum(x, 0)
+        return cp.maximum(x, 0)
 
     def forward(self, x: FloatArray) -> FloatArray:
         """

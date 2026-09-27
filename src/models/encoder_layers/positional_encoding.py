@@ -3,7 +3,7 @@
     scaled embeddings [B, T, D] + PE[:T] ──> X_0 [B, T, D] ──> first EncoderBlock
 """
 
-import numpy as np
+import cupy as cp
 
 from src.tensor_types import FloatArray
 
@@ -32,13 +32,13 @@ class PositionalEncoding:
         Returns:
             [max_T, D] float32, e.g. [512, 512].
         """
-        positions = np.arange(self.max_seq_length)[:, None]  # pos: [max_T, 1]
-        two_i = np.arange(0, self.embedding_dim, 2)[None, :]  # 2i:  [1, D/2]
+        positions = cp.arange(self.max_seq_length)[:, None]  # pos: [max_T, 1]
+        two_i = cp.arange(0, self.embedding_dim, 2)[None, :]  # 2i:  [1, D/2]
         angles = positions / (10000 ** (two_i / self.embedding_dim))  # [max_T, D/2]
 
-        pe = np.zeros((self.max_seq_length, self.embedding_dim), dtype=np.float32)
-        pe[:, 0::2] = np.sin(angles)  # even dimensions
-        pe[:, 1::2] = np.cos(angles)  # odd dimensions share the same frequency as their even pair
+        pe = cp.zeros((self.max_seq_length, self.embedding_dim), dtype=cp.float32)
+        pe[:, 0::2] = cp.sin(angles)  # even dimensions
+        pe[:, 1::2] = cp.cos(angles)  # odd dimensions share the same frequency as their even pair
         return pe
 
     def forward(self, x: FloatArray) -> FloatArray:

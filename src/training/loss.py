@@ -1,6 +1,6 @@
 """Cross-entropy loss (documents/encoders/7-linearization-and-softmax.md, "Loss Calculation")."""
 
-import numpy as np
+import cupy as cp
 
 from src.tensor_types import FloatArray, IntArray
 
@@ -20,8 +20,8 @@ def cross_entropy_loss(probabilities: FloatArray, targets: IntArray) -> tuple[fl
         d_logits: [N, V] gradient to pass to ``TransformerEncoder.backward``.
     """
     n = targets.shape[0]
-    rows = np.arange(n)
-    loss = -np.mean(np.log(probabilities[rows, targets] + 1e-9))
+    rows = cp.arange(n)
+    loss = -cp.mean(cp.log(probabilities[rows, targets] + 1e-9))
 
     d_logits = probabilities.copy()
     d_logits[rows, targets] -= 1.0

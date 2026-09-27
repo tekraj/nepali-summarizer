@@ -12,14 +12,17 @@ training:
   epochs: 10
   learning_rate: 0.0001
   max_grad_norm: 1.0
-  mlm_probability: 0.15   # fraction of real tokens hidden behind <mask> each step
   seed: 42
   checkpoint_dir: checkpoints
 
 data:
-  max_sequence_length: 512   # T
+  # One training sample = <s> article </s> summary </s>, so T <= 768 + 256 = 1024.
+  max_article_length: 768    # <s> + article + </s>; the article's right side is truncated to fit
+  max_summary_length: 256    # summary + </s>; loss is computed only over these tokens
+  max_sequence_length: 1024  # T cap for the positional encoding (article + summary)
   source_dir: data/raw
-  cleaned_dir: data/cleaned
+  cleaned_dir: data/cleaned  # articles: {filename}.txt
+  summary_dir: data/summary  # targets:  {filename}-summary.txt
   processed_dir: data/processed
   vocab_dir: data/nepali_vocab_output   # vocab.json + merges.txt from train-nepali-bpe
 

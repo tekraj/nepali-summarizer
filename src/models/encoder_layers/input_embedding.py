@@ -5,7 +5,7 @@
 
 import math
 
-import numpy as np
+import cupy as cp
 
 from src.tensor_types import FloatArray, IntArray
 
@@ -34,7 +34,7 @@ class InputEmbedding:
         Returns:
             E: [V, D] float32, e.g. [6302, 512].
         """
-        return np.random.normal(0, 0.02, size=(vocab_size, self.embedding_dim)).astype(np.float32)
+        return cp.random.normal(0, 0.02, size=(vocab_size, self.embedding_dim)).astype(cp.float32)
 
     def forward(self, token_ids: IntArray) -> FloatArray:
         """Step 1 (row lookup) + Step 2 (scale by √D).
@@ -55,9 +55,9 @@ class InputEmbedding:
         Args:
             d_out: [B, T, D] gradient of the scaled embeddings.
         """
-        d_embedding = np.zeros_like(self.embedding_matrix)  # [V, D]
+        d_embedding = cp.zeros_like(self.embedding_matrix)  # [V, D]
         # add.at accumulates when the same token appears several times in the batch.
-        np.add.at(d_embedding, self._token_ids, d_out * self.scale)
+        cp.add.at(d_embedding, self._token_ids, d_out * self.scale)
         self.grads = {"embedding_matrix": d_embedding}
 
     def parameters(self) -> dict[str, FloatArray]:
