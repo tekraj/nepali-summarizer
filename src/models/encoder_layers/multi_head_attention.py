@@ -5,7 +5,7 @@
 
 import math
 
-import numpy as np
+import cupy as cp
 
 from .functional import matmul_weight_grad, stable_softmax
 from src.tensor_types import BoolArray, FloatArray
@@ -33,9 +33,9 @@ class MultiHeadAttention:
         # They are stored side by side so head i owns columns [i*Dh : (i+1)*Dh]. This is the
         # same math as 24 separate matrices, but one [512, 512] matmul projects every head at once.
         per_head_q, per_head_k, per_head_v = zip(*(self._init_head_weights() for _ in range(heads)))
-        self.W_q = np.concatenate(per_head_q, axis=1)  # [D, H*Dh] = [512, 512]
-        self.W_k = np.concatenate(per_head_k, axis=1)  # [D, H*Dh] = [512, 512]
-        self.W_v = np.concatenate(per_head_v, axis=1)  # [D, H*Dh] = [512, 512]
+        self.W_q = cp.concatenate(per_head_q, axis=1)  # [D, H*Dh] = [512, 512]
+        self.W_k = cp.concatenate(per_head_k, axis=1)  # [D, H*Dh] = [512, 512]
+        self.W_v = cp.concatenate(per_head_v, axis=1)  # [D, H*Dh] = [512, 512]
 
         # Phase 3, Step 5 — output projection that fuses the concatenated heads.
         self.W_o = self.generate_learnable_weight_matrix()  # [D, D] = [512, 512]
@@ -47,12 +47,12 @@ class MultiHeadAttention:
         """Xavier/Glorot-initialise one head's W_q, W_k, W_v, each [D, Dh] = [512, 64]."""
         std = math.sqrt(2.0 / (self.dim + self.head_dim))
         shape = (self.dim, self.head_dim)
-        return tuple(np.random.normal(0, std, shape).astype(np.float32) for _ in range(3))
+        return tuple(cp.random.normal(0, std, shape).astype(cp.float32) for _ in range(3))
 
     def generate_learnable_weight_matrix(self) -> FloatArray:
         """Xavier/Glorot-initialise W_o: [H*Dh, D] = [512, 512]."""
         std = math.sqrt(2.0 / (self.dim + self.dim))
-        return np.random.normal(0, std, (self.dim, self.dim)).astype(np.float32)
+        return cp.random.normal(0, std, (self.dim, self.dim)).astype(cp.float32)
 
     def _split_heads(self, x: FloatArray) -> FloatArray:
         """Split the model dimension into heads: [B, T, D] -> [B, H, T, Dh]."""
@@ -85,7 +85,7 @@ class MultiHeadAttention:
 
         Args:
             Q, K, V:        [B, H, T, Dh].
-            attention_mask: [B, T] bool, True = real token, False = [PAD].
+            attention_mask: [B, T] bool, True = real token, False = [PAD]; or [B, T, T] (query x key), True = may attend.
 
         Returns:
             head_outputs: [B, H, T, Dh] context-aware vectors.
@@ -96,7 +96,9 @@ class MultiHeadAttention:
         scores = Q @ K.swapaxes(-1, -2) / math.sqrt(self.head_dim)
 
         # 3. Mask: [B, T] -> [B, 1, 1, T], so every query in every head ignores the same pad keys.
-        scores = np.where(attention_mask[:, None, None, :], scores, MASK_VALUE)
+        #    A [B, T, T] (query x key) mask, e.g. the prefix-LM mask, -> [B, 1, T, T] for every head.
+        mask = attention_mask[:, None, None, :] if attention_mask.ndim == 2 else attention_mask[:, None, :, :]
+        scores = cp.where(mask, scores, MASK_VALUE)
 
         # 4. Softmax over the key axis: each row becomes weights summing to 1.0 (pads get 0.0).
         weights = stable_softmax(scores, axis=-1)
@@ -109,7 +111,7 @@ class MultiHeadAttention:
 
         Args:
             X:              [B, T, D] block input (X_in).
-            attention_mask: [B, T] bool, True = real token.
+            attention_mask: [B, T] bool, True = real token; or [B, T, T] (query x key), True = may attend.
 
         Returns:
             [B, T, D] — same shape as X, ready for the first Add & Norm.
@@ -144,7 +146,7 @@ class MultiHeadAttention:
 
         # softmax: dS = P ⊙ (dP - Σ_j dP_j P_j). Masked positions have P = 0, so they get 0 gradient.
         p = c["weights"]
-        d_scores = p * (d_weights - np.sum(d_weights * p, axis=-1, keepdims=True))
+        d_scores = p * (d_weights - cp.sum(d_weights * p, axis=-1, keepdims=True))
         d_scores /= math.sqrt(self.head_dim)
 
         # scores = Q Kᵀ

@@ -2,7 +2,7 @@
 
 import math
 
-import numpy as np
+import cupy as cp
 
 from src.tensor_types import FloatArray
 
@@ -43,7 +43,7 @@ class Adam:
             Global gradient norm before clipping (useful to watch for instability).
         """
         self.step_count += 1
-        grad_norm = math.sqrt(sum(float(np.sum(g * g)) for g in grads.values()))
+        grad_norm = math.sqrt(sum(float(cp.sum(g * g)) for g in grads.values()))
         clip = min(1.0, self.max_grad_norm / (grad_norm + 1e-6))
 
         # Bias correction: m and v start at 0, so early averages are rescaled upwards.
@@ -52,12 +52,12 @@ class Adam:
         for name, param in params.items():
             grad = grads[name] * clip
             if name not in self.m:
-                self.m[name] = np.zeros_like(param)
-                self.v[name] = np.zeros_like(param)
+                self.m[name] = cp.zeros_like(param)
+                self.v[name] = cp.zeros_like(param)
             m, v = self.m[name], self.v[name]
             m *= self.beta1
             m += (1 - self.beta1) * grad
             v *= self.beta2
             v += (1 - self.beta2) * grad * grad
-            param -= lr_t * m / (np.sqrt(v) + self.eps)
+            param -= lr_t * m / (cp.sqrt(v) + self.eps)
         return grad_norm

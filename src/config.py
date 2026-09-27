@@ -23,13 +23,15 @@ class ProjectConfig:
     epochs: int = 10
     learning_rate: float = 1e-4
     max_grad_norm: float = 1.0
-    mlm_probability: float = 0.15
     seed: int = 42
     checkpoint_dir: str = "checkpoints"
 
     # data
-    max_sequence_length: int = 512
+    max_article_length: int = 768
+    max_summary_length: int = 256
+    max_sequence_length: int = 1024
     cleaned_dir: str = "data/cleaned"
+    summary_dir: str = "data/summary"
     vocab_dir: str = "data/nepali_vocab_output"
 
     # model

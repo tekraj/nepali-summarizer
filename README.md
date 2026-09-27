@@ -1,4 +1,6 @@
-# Building a Nepali Summarization Transformer from Scratch (NumPy)
+# Building a Nepali Summarization Transformer from Scratch (CuPy)
+
+Every layer, its backward pass, the loss and the Adam optimizer are hand-written with [CuPy](https://cupy.dev/), the NumPy-compatible array library that runs on NVIDIA GPUs. There is no PyTorch and no autograd. All weights, activations and gradients are `float32` (fp32).
 
 ## 1. Data Preparation & Tokenization
 
@@ -9,18 +11,20 @@ Building an NLP pipeline for Nepali requires handling specific Devanagari script
     1. Initialize a vocabulary with all distinct Unicode characters in the corpus.
     2. Iteratively find the most frequent adjacent pair of tokens and merge them.
     3. Map the final subwords to integer IDs (e.g., $0$ to $V-1$).
-*   **Sequence Formatting:** For summarization, structure your training pairs as `[Encoder_Input, Decoder_Input, Target_Output]`. Pad sequences to a fixed length and create attention masks (to prevent attending to padding) and subsequent masks (to prevent the decoder from looking ahead).
+*   **Sequence Formatting (encoder-only, prefix-LM):** Each article `data/cleaned/{name}.txt` is paired with its summary `data/summary/{name}-summary.txt`. One training sample is `<s> article </s> summary </s>`. The article part is at most 768 tokens, and anything past that is cut from the end of the article. The summary part is at most 256 tokens. Samples are padded to the longest one in the batch, up to 1024 tokens.
+    *   **Attention mask `[B, T, T]`:** article tokens see the whole article. Summary tokens see the article plus only the summary tokens before them, so the model cannot look ahead.
+    *   **Loss mask:** position $p$ predicts token $p+1$, and only positions whose next token is part of the summary are scored. The loss covers the summary sequence alone.
 
 ## 2. Matrix Architecture & Forward Pass
 
 Since you are bypassing frameworks, your core task is managing multidimensional arrays (tensors) and executing the mathematical graph sequentially.
 
-*   **Embeddings & Positional Encoding:** Initialize a weight matrix of shape $(V, d_{model})$ using normal distribution scaling. Because NumPy arrays have no inherent sequence order, generate a fixed Positional Encoding matrix using sine and cosine functions for odd and even indices:
+*   **Embeddings & Positional Encoding:** Initialize a weight matrix of shape $(V, d_{model})$ using normal distribution scaling. Because the arrays have no inherent sequence order, generate a fixed Positional Encoding matrix using sine and cosine functions for odd and even indices:
     $$PE_{(pos, 2i)} = \sin(pos / 10000^{2i/d_{model}})$$
     $$PE_{(pos, 2i+1)} = \cos(pos / 10000^{2i/d_{model}})$$
     Add this to your token embeddings.
 *   **Multi-Head Attention (MHA):** This is the engine of the Transformer. For each head, initialize weight matrices $W^Q, W^K, W^V$. 
-    1. Project inputs into Queries ($Q$), Keys ($K$), and Values ($V$) via matrix multiplication (`np.dot` or `np.matmul`).
+    1. Project inputs into Queries ($Q$), Keys ($K$), and Values ($V$) via matrix multiplication (`cp.matmul`, or `@`).
     2. Compute scaled dot-product attention: 
        $$Attention(Q, K, V) = softmax\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
     3. Concatenate the heads and multiply by an output weight matrix $W^O$.
@@ -41,16 +45,19 @@ Without PyTorch's Autograd, you must manually calculate the chain rule derivativ
 
 ## 4. Training Loop & Inference
 
-*   **Batching & Memory:** NumPy executes on the CPU by default. Processing 200,000 documents requires writing a custom data loader that yields mini-batches (e.g., 16 or 32 sequences at a time) to avoid RAM exhaustion.
-*   **Autoregressive Generation:** For inference, the model cannot output the summary in one pass. Write a decoding loop that feeds the source document into the encoder once, then starts the decoder with a `<BOS>` (Begin of Sequence) token.
-*   **Search Strategy:** At each step, take the NumPy array of output probabilities. Implement either Greedy Search (taking the `np.argmax` of the highest probability token) or a Beam Search algorithm to maintain the top $k$ most likely sequences until the model outputs an `<EOS>` (End of Sequence) token.
+*   **Batching & Memory:** CuPy runs on the GPU, so every weight, activation and gradient lives in VRAM. The data loader streams (article, summary) pairs from disk and yields mini-batches of `batch_size` pairs (default 4). Each block caches its activations for backprop, and the attention weights alone take `B × H × T × T` floats per block. At B=4 and T=1024, one training step needs about 3 GB, which fits on a 6 GB GPU.
+*   **Autoregressive Generation:** For inference, the model cannot output the summary in one pass. The loop starts from `<s> article </s>`, runs the encoder with the same prefix-LM mask used in training, and appends the predicted next token each step. It stops at `</s>` or after 256 summary tokens. There is no KV cache, so each step reruns the full forward pass.
+*   **Search Strategy:** Greedy Search: at each step take `cp.argmax` of the output probabilities. Beam Search, which keeps the top $k$ sequences, is not implemented.
 
 ## Project Setup and Commands
+
+**Requirements:** an NVIDIA GPU with a CUDA 12.x driver. The `cupy-cuda12x` wheel bundles the CUDA runtime libraries, so the full CUDA toolkit is not needed. On WSL2, install the NVIDIA Windows driver with WSL support, and check that `nvidia-smi` works inside WSL. CuPy does not support macOS.
 
 Install the project and its dependencies in editable mode:
 
 ```bash
-python -m pip install -e .
+uv sync                        # or: python -m pip install -e .
+python -c "import cupy; print(cupy.cuda.runtime.getDeviceCount())"   # should print >= 1
 ```
 
 Then run the installed cleaning command:
@@ -62,9 +69,12 @@ clean-data
 From the project root, modules can also be run without installation:
 
 ```bash
-python -m scripts.clean_data
-python -m scripts.preprocess_data
-python -m scripts.train_model
-python -m scripts.infer
+python -m scripts.clean_data          # data/raw -> data/cleaned
+python -m scripts.train_nepali_bpe    # data/cleaned -> data/nepali_vocab_output
+python -m scripts.train_model         # train on data/cleaned + data/summary pairs
+python -m scripts.train_model --max-steps 5 --epochs 1                  # quick smoke test
+python -m scripts.infer --checkpoint checkpoints/summarizer_epoch_3.npz --article data/cleaned/100001.txt
 python -m src.main
 ```
+
+Training settings (article/summary lengths, batch size, epochs, model size) are in [config/config.yaml](config/config.yaml). A checkpoint is saved after every epoch as `checkpoints/summarizer_epoch_N.npz`.

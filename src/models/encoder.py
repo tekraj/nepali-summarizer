@@ -7,7 +7,7 @@
       -> LanguageModelingHead      [B, T, V]   logits, probabilities
 """
 
-import numpy as np
+import cupy as cp
 
 from .encoder_layers import (
     AddNormBlock,
@@ -38,7 +38,7 @@ class EncoderBlock:
         """
         Args:
             x_in:           [B, T, D] output of the previous block (or X_0).
-            attention_mask: [B, T] bool, True = real token.
+            attention_mask: [B, T] bool, True = real token; or [B, T, T] (query x key), True = may attend.
 
         Returns:
             X_out: [B, T, D] input for the next block.
@@ -91,7 +91,7 @@ class TransformerEncoder:
 
         Args:
             token_ids:      [B, T] int64.
-            attention_mask: [B, T] bool, True = real token.
+            attention_mask: [B, T] bool, True = real token; or [B, T, T] (query x key), True = may attend.
 
         Returns:
             X_N: [B, T, D], e.g. [4, 512, 512].
@@ -113,7 +113,7 @@ class TransformerEncoder:
 
         Args:
             token_ids:      [B, T] int64.
-            attention_mask: [B, T] bool.
+            attention_mask: [B, T] or [B, T, T] bool.
             output_mask:    optional [B, T] bool; if given, only the N True positions are scored.
 
         Returns:
@@ -135,7 +135,7 @@ class TransformerEncoder:
         d_hidden = self.lm_head.backward(d_logits)
         if self._output_mask is not None:
             # Scatter [N, D] back into [B, T, D]; unscored positions receive no direct gradient.
-            full = np.zeros(self._hidden_shape, dtype=np.float32)
+            full = cp.zeros(self._hidden_shape, dtype=cp.float32)
             full[self._output_mask] = d_hidden
             d_hidden = full
 

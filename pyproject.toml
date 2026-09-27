@@ -9,6 +9,8 @@ description = "Nepali text summarization project"
 requires-python = ">=3.12"
 dependencies = [
     "numpy>=1.26.0",
+    # GPU arrays for the hand-written Transformer (fp32). CUDA 12.x wheel; >=13 for ufunc.at (cp.add.at).
+    "cupy-cuda12x>=13.0.0",
     "pandas>=2.2.0",
     "scipy>=1.11.0",
     "PyYAML>=6.0.0",

@@ -6,7 +6,7 @@ Post-LN, exactly as in the docs:
                     └──────────────────────────────────────┴─> Add ─> LayerNorm ─> [B, T, D]
 """
 
-import numpy as np
+import cupy as cp
 
 from src.tensor_types import FloatArray
 
@@ -36,8 +36,8 @@ class LayerNormalization:
     def __init__(self, d_model: int, eps: float = 1e-5) -> None:
         self.d_model = d_model
         self.eps = eps
-        self.gamma = np.ones(d_model, dtype=np.float32)  # γ scale: [D]
-        self.beta = np.zeros(d_model, dtype=np.float32)  # β shift: [D]
+        self.gamma = cp.ones(d_model, dtype=cp.float32)  # γ scale: [D]
+        self.beta = cp.zeros(d_model, dtype=cp.float32)  # β shift: [D]
 
         self.grads: dict[str, FloatArray] = {}
         self.cache: dict[str, FloatArray] = {}
@@ -51,9 +51,9 @@ class LayerNormalization:
         Returns:
             [B, T, D], each token vector has ~zero mean and unit variance before γ/β.
         """
-        mu = np.mean(x, axis=-1, keepdims=True)  # [B, T, 1]
-        var = np.var(x, axis=-1, keepdims=True)  # [B, T, 1]
-        inv_std = 1.0 / np.sqrt(var + self.eps)  # [B, T, 1]
+        mu = cp.mean(x, axis=-1, keepdims=True)  # [B, T, 1]
+        var = cp.var(x, axis=-1, keepdims=True)  # [B, T, 1]
+        inv_std = 1.0 / cp.sqrt(var + self.eps)  # [B, T, 1]
         x_hat = (x - mu) * inv_std  # [B, T, D]
 
         self.cache = {"x_hat": x_hat, "inv_std": inv_std}
@@ -68,15 +68,15 @@ class LayerNormalization:
             [B, T, D] gradient of the input x.
         """
         x_hat, inv_std = self.cache["x_hat"], self.cache["inv_std"]
-        self.grads["gamma"] = np.sum(d_out * x_hat, axis=(0, 1))  # [D]
-        self.grads["beta"] = np.sum(d_out, axis=(0, 1))  # [D]
+        self.grads["gamma"] = cp.sum(d_out * x_hat, axis=(0, 1))  # [D]
+        self.grads["beta"] = cp.sum(d_out, axis=(0, 1))  # [D]
 
         d_x_hat = d_out * self.gamma  # [B, T, D]
         # Standard LayerNorm input gradient (μ and σ² both depend on every feature of x).
         return inv_std * (
             d_x_hat
-            - np.mean(d_x_hat, axis=-1, keepdims=True)
-            - x_hat * np.mean(d_x_hat * x_hat, axis=-1, keepdims=True)
+            - cp.mean(d_x_hat, axis=-1, keepdims=True)
+            - x_hat * cp.mean(d_x_hat * x_hat, axis=-1, keepdims=True)
         )
 
     def parameters(self) -> dict[str, FloatArray]:

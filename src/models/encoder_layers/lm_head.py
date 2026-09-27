@@ -6,7 +6,7 @@ Matmul broadcasts over leading axes, so the head also accepts [N, D] (only the m
 positions during training) and returns [N, V] — much cheaper than scoring all B*T tokens.
 """
 
-import numpy as np
+import cupy as cp
 
 from .functional import matmul_weight_grad, stable_softmax
 from src.tensor_types import FloatArray
@@ -37,8 +37,8 @@ class LanguageModelingHead:
             # A transposed *view* of E: optimizer updates to E are seen here automatically.
             self.W_lm = embedding_matrix.T  # [D, V]
         else:
-            self.W_lm = np.random.normal(0, 0.02, (d_model, vocab_size)).astype(np.float32)  # [D, V]
-        self.b_lm = np.zeros(vocab_size, dtype=np.float32)  # [V]
+            self.W_lm = cp.random.normal(0, 0.02, (d_model, vocab_size)).astype(cp.float32)  # [D, V]
+        self.b_lm = cp.zeros(vocab_size, dtype=cp.float32)  # [V]
 
         self.grads: dict[str, FloatArray] = {}
         self.cache: dict[str, FloatArray] = {}
