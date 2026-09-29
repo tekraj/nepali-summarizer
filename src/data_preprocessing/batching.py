@@ -124,6 +124,12 @@ class CreateTrainingBatch:
         batch = list(itertools.islice(self._pair_stream, self.batch_size))
         return batch or None
 
+    def skip_batches(self, num_batches: int) -> None:
+        """Drop the next ``num_batches`` batches without tokenizing them (to resume mid-epoch)."""
+        for _ in range(num_batches):
+            if self.get_next_batch() is None:
+                break
+
     def encode_articles(self, articles: list[str]) -> list[list[int]]:
         """``<s> article </s>`` IDs, the article's right side truncated to fit ``max_article_length``."""
         budget = self.max_article_length - 2  # room for <s> and </s>

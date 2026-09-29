@@ -61,3 +61,42 @@ class Adam:
             v += (1 - self.beta2) * grad * grad
             param -= lr_t * m / (cp.sqrt(v) + self.eps)
         return grad_norm
+
+    def state_dict(self) -> dict[str, FloatArray]:
+        """Everything needed to continue with the exact same updates, as flat checkpoint entries.
+
+        Returns:
+            ``optimizer.step_count`` (t, drives the bias correction), the hyperparameters, and
+            ``optimizer.m.<param name>`` / ``optimizer.v.<param name>`` per weight (same shapes).
+        """
+        state = {
+            "optimizer.step_count": cp.asarray(self.step_count, dtype=cp.int64),
+            "optimizer.learning_rate": cp.asarray(self.learning_rate),
+            "optimizer.beta1": cp.asarray(self.beta1),
+            "optimizer.beta2": cp.asarray(self.beta2),
+            "optimizer.eps": cp.asarray(self.eps),
+            "optimizer.max_grad_norm": cp.asarray(self.max_grad_norm),
+        }
+        for name in self.m:
+            state[f"optimizer.m.{name}"] = self.m[name]
+            state[f"optimizer.v.{name}"] = self.v[name]
+        return state
+
+    def load_state_dict(self, state: dict[str, FloatArray], params: dict[str, FloatArray]) -> None:
+        """Restore ``state_dict()`` output. The learning rate etc. keep their current values, so
+        a changed config still applies; only t, m and v come from the checkpoint.
+
+        Args:
+            state:  checkpoint entries (extra non-optimizer keys are ignored).
+            params: ``model.parameters()``, to check that m and v match every weight.
+        """
+        self.step_count = int(state["optimizer.step_count"])
+        self.m, self.v = {}, {}
+        for name, param in params.items():
+            m, v = state.get(f"optimizer.m.{name}"), state.get(f"optimizer.v.{name}")
+            if m is None or v is None:
+                continue  # weight never updated yet; step() creates zeros for it
+            if m.shape != param.shape or v.shape != param.shape:
+                raise ValueError(f"optimizer state for {name} has shape {m.shape}, weight is {param.shape}")
+            self.m[name] = cp.asarray(m, dtype=param.dtype)
+            self.v[name] = cp.asarray(v, dtype=param.dtype)
