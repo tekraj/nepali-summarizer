@@ -6,11 +6,12 @@ Every layer, its backward pass, the loss and the Adam optimizer are hand-written
 
 Building an NLP pipeline for Nepali requires handling specific Devanagari script nuances before any matrix math begins.
 
-*   **Corpus Cleaning:** Standardize the 200,000 documents by removing HTML tags, English boilerplate, and normalizing Devanagari characters. You must handle Zero-Width Joiners (ZWJ) and Zero-Width Non-Joiners (ZWNJ) consistently, as well as normalize composite characters (e.g., halants joining consonants) into their canonical Unicode forms.
+*   **Corpus:** about 132,000 pure-Devanagari Nepali news articles (`data/cleaned/{name}.txt`), each paired with a target summary (`data/summary/{name}-summary.txt`).
+*   **Corpus Cleaning:** Standardize the documents by removing HTML tags, English boilerplate, and normalizing Devanagari characters. You must handle Zero-Width Joiners (ZWJ) and Zero-Width Non-Joiners (ZWNJ) consistently, as well as normalize composite characters (e.g., halants joining consonants) into their canonical Unicode forms.
 *   **Subword Tokenization (BPE):** Word-level tokenization struggles with Nepali's rich morphology and compounding. Implement a Byte-Pair Encoding (BPE) algorithm to build a vocabulary. 
     1. Initialize a vocabulary with all distinct Unicode characters in the corpus.
     2. Iteratively find the most frequent adjacent pair of tokens and merge them.
-    3. Map the final subwords to integer IDs (e.g., $0$ to $V-1$).
+    3. Map the final subwords to integer IDs ($0$ to $V-1$; this project uses $V = 30,000$).
 *   **Sequence Formatting (encoder-only, prefix-LM):** Each article `data/cleaned/{name}.txt` is paired with its summary `data/summary/{name}-summary.txt`. One training sample is `<s> article </s> summary </s>`. The article part is at most 768 tokens, and anything past that is cut from the end of the article. The summary part is at most 256 tokens. Samples are padded to the longest one in the batch, up to 1024 tokens.
     *   **Attention mask `[B, T, T]`:** article tokens see the whole article. Summary tokens see the article plus only the summary tokens before them, so the model cannot look ahead.
     *   **Loss mask:** position $p$ predicts token $p+1$, and only positions whose next token is part of the summary are scored. The loss covers the summary sequence alone.

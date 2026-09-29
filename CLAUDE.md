@@ -36,7 +36,7 @@ src/
   tensor_types.py           FloatArray / IntArray / BoolArray + the shape legend (B, T, D, H, Dh, D_ff, V, N)
   data_preprocessing/
     text_cleaning_pipeline  NFC normalize, strip HTML, remove ZWJ/ZWNJ, collapse whitespace
-    bpe_tokenization        trains HF `tokenizers` ByteLevelBPE (vocab 30000 target; the current vocab has 6302)
+    bpe_tokenization        trains HF `tokenizers` ByteLevelBPE (V = 30000)
     batching.py             CreateTrainingBatch: pairs {name}.txt with {name}-summary.txt -> [B,T] ids,
                             [B,T,T] prefix-LM mask, [B,T] loss mask, [N] next-token targets
   models/
@@ -46,7 +46,8 @@ src/
   training/                 loss.py (softmax+CE combined grad), optimizer.py (Adam + global-norm clip), train.py
   inference/greedy_decoder  argmax over LM-head probabilities; greedy_summarize = autoregressive loop
 documents/                  math and explanations; encoders/1..9 map to the encoder_layers files
-data/raw, data/cleaned      ~1.3k Nepali news .txt files (both are committed to git)
+data/cleaned                ~132K pure-Devanagari Nepali news articles, {name}.txt (committed to git)
+data/summary                one target summary per article, {name}-summary.txt (committed to git)
 checkpoints/                .npz weights (gitignored)
 ```
 
@@ -72,6 +73,8 @@ checkpoints/                .npz weights (gitignored)
 
 - **Memory:** every block caches its activations, and the attention weights alone take `B×H×T×T` floats per block. That is why `batch_size` defaults to 4 (about 2.9 GB peak at T=1024). Before raising `B`, `T` or `num_layers`, think about how much RAM it needs.
 - The batcher yields **one (article, summary) pair per sample**, and only for articles that have a `data/summary/{name}-summary.txt` file. Samples are padded to the longest one in the batch, so `T` changes from batch to batch.
-- Old `checkpoints/encoder_epoch_*.npz` (MLM) use a 1088-token vocab and cannot be loaded with the current 30000-token vocab.
+- Checkpoints trained before the 30000-token vocab cannot be loaded, because `E` and `W_lm` have a different shape. This includes the old MLM `checkpoints/encoder_epoch_*.npz` (1088-token vocab) and anything trained with the earlier 6302-token vocab.
+- With V = 30000, `E` and `W_lm` hold 15.36M parameters each, and the whole model has about 49.7M (`tie_weights: false`). The loss at step 0 should be about ln 30000 ≈ 10.3.
+- The ByteLevel pre-tokenizer (GPT-2 regex) splits Devanagari words at every vowel sign, because matras are Unicode marks (Mn/Mc), not `\p{L}`. So no BPE token spans a matra: "नेपाल" is 5 tokens even with the 30K vocab, and text averages about 1.5 characters per token. Keep this in mind for the 766-token article budget.
 - Some documents and READMEs are out of date. [documents/encoders/9-backpropagation.md](documents/encoders/9-backpropagation.md) refers to `src/models/layers/` (the real path is `src/models/encoder_layers/`). README.md lists `scripts.preprocess_data`, which does not exist. [src/data_preprocessing/README.md](src/data_preprocessing/README.md) describes a from-scratch BPE, but the code uses HF `tokenizers`. When the code and the prose disagree, trust the code.
 - `scripts/train_nepali_bpe.py` and `scripts/clean_data.py` hard-code their paths instead of reading `config.yaml`.

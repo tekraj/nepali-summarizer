@@ -10,7 +10,7 @@
 | | Shape | This project |
 | --- | --- | --- |
 | Input (token IDs) | $(B, T)$ | $(4, 512)$ integers |
-| Embedding matrix $E$ | $(V, d_{\text{model}})$ | $(6302, 512)$ |
+| Embedding matrix $E$ | $(V, d_{\text{model}})$ | $(30000, 512)$ |
 | Output | $(B, T, d_{\text{model}})$ | $(4, 512, 512)$ |
 
 > **Code:** `src/models/layers/input_embedding.py` → `InputEmbedding`
@@ -21,14 +21,14 @@
 
 The embedding layer consists of a lookup table represented by the 2D matrix $E$ with dimensions $V \times d_{\text{model}}$:
 
-* **$V$ (Vocabulary Size):** The total number of unique tokens created during the Byte-Pair Encoding (BPE) process. Large models use e.g. $50,000$; **our Nepali BPE vocabulary has $V = 6,302$**.
+* **$V$ (Vocabulary Size):** The total number of unique tokens created during the Byte-Pair Encoding (BPE) process. Large models use e.g. $50,000$; **our Nepali BPE vocabulary has $V = 30,000$**.
 * **$d_{\text{model}}$ (Embedding Dimension):** The width of the Transformer's hidden vector space (e.g., $512$ or $4096$). **We use $d_{\text{model}} = 512$.**
 
 Row $r$ of the matrix is the vector for token ID $r$. Rows are numbered from $0$ to $V-1$ (matching token IDs), columns from $1$ to $d_{\text{model}}$:
 
 $$\text{Embedding Matrix } E = \begin{bmatrix} e_{0,1} & e_{0,2} & \dots & e_{0,d_{\text{model}}} \\ e_{1,1} & e_{1,2} & \dots & e_{1,d_{\text{model}}} \\ \vdots & \vdots & \ddots & \vdots \\ e_{V-1,1} & e_{V-1,2} & \dots & e_{V-1,d_{\text{model}}} \end{bmatrix}$$
 
-Size in this project: $6302 \times 512 = 3,226,624$ learnable numbers.
+Size in this project: $30000 \times 512 = 15,360,000$ learnable numbers.
 
 ---
 

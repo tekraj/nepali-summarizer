@@ -17,7 +17,7 @@ class InputEmbedding:
         """
         Args:
             embedding_dim: D (d_model), e.g. 512.
-            vocab_size:    V, number of BPE tokens, e.g. 6302.
+            vocab_size:    V, number of BPE tokens, e.g. 30000.
         """
         self.embedding_dim = embedding_dim
         self.vocab_size = vocab_size
@@ -32,7 +32,7 @@ class InputEmbedding:
         """Fill ``E`` with small random values, E_ij ~ N(0, 0.02).
 
         Returns:
-            E: [V, D] float32, e.g. [6302, 512].
+            E: [V, D] float32, e.g. [30000, 512].
         """
         return cp.random.normal(0, 0.02, size=(vocab_size, self.embedding_dim)).astype(cp.float32)
 

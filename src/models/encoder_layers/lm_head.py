@@ -25,7 +25,7 @@ class LanguageModelingHead:
         """
         Args:
             d_model:          D, e.g. 512.
-            vocab_size:       V, e.g. 6302.
+            vocab_size:       V, e.g. 30000.
             tie_weights:      reuse Eᵀ as W_lm instead of a separate matrix.
             embedding_matrix: E [V, D], required when ``tie_weights`` is True.
         """

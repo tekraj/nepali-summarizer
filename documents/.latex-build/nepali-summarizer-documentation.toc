@@ -1,0 +1,130 @@
+\contentsline {part}{I\hspace {1em}Data Preprocessing}{3}{part.1}%
+\contentsline {chapter}{\numberline {1}Byte-Pair Encoding (BPE) Tokenization for Devanagari Text}{4}{chapter.1}%
+\contentsline {section}{Architecture Overview}{4}{section*.2}%
+\contentsline {section}{Phase 1: Training the Tokenizer (Building the Dictionary)}{4}{section*.3}%
+\contentsline {subsection}{1. Base Initialization (Special Tokens + The 256 Bytes)}{4}{section*.4}%
+\contentsline {subsection}{2. Raw Byte Breakdown}{5}{section*.5}%
+\contentsline {subsection}{3. Frequency Counting}{5}{section*.6}%
+\contentsline {subsection}{4. Statistical Merging}{5}{section*.7}%
+\contentsline {subsection}{5. Dictionary Mapping}{5}{section*.8}%
+\contentsline {subsection}{6. Iteration and Expansion}{6}{section*.9}%
+\contentsline {section}{Phase 2: Tokenization (Encoding New Input)}{6}{section*.10}%
+\contentsline {section}{Phase 3: Decoding (Translating Back to Human Text)}{7}{section*.11}%
+\contentsline {part}{II\hspace {1em}The Transformer Encoder}{8}{part.2}%
+\contentsline {chapter}{\numberline {2}Transformer Input Embedding Layer}{9}{chapter.2}%
+\contentsline {section}{1. Matrix Architecture \& Dimensions}{9}{section*.12}%
+\contentsline {section}{2. Initialization \& Theoretical Foundations}{10}{section*.13}%
+\contentsline {subsection}{Why \(\mitsigma = 0.02\) is Used}{10}{section*.14}%
+\contentsline {section}{3. The Step-by-Step Pipeline}{10}{section*.15}%
+\contentsline {subsection}{Step 1: Matrix Lookup}{10}{section*.16}%
+\contentsline {subsection}{Step 2: Vector Scaling by \(\sqrt {d_{\text {model}}}\)}{10}{section*.17}%
+\contentsline {subsection}{Worked Example (tiny numbers)}{11}{section*.18}%
+\contentsline {subsection}{Step 3: Acquiring Meaning via Backpropagation}{11}{section*.19}%
+\contentsline {chapter}{\numberline {3}The Complete Positional Encoding \& Input Preparation Pipeline}{12}{chapter.3}%
+\contentsline {section}{1. Mathematical Generation of Positional Encodings}{12}{section*.20}%
+\contentsline {subsection}{Worked Example: \(PE\) for \(d_{\text {model}} = 4\)}{13}{section*.21}%
+\contentsline {section}{2. Element-Wise Addition for Single Sequences}{13}{section*.22}%
+\contentsline {subsection}{Worked Example (continuing from \texttt {1-input\_\allowbreak {}embedding.\allowbreak {}md})}{14}{section*.23}%
+\contentsline {section}{3. Batching Multiple Sequences (3D Tensors)}{14}{section*.24}%
+\contentsline {section}{4. Padding Variable-Length Sequences}{14}{section*.25}%
+\contentsline {section}{5. Applying the Attention Mask}{15}{section*.26}%
+\contentsline {subsection}{Worked Example}{15}{section*.27}%
+\contentsline {chapter}{\numberline {4}Multi-Head Self-Attention}{17}{chapter.4}%
+\contentsline {section}{Phase 1: Data Ingestion (The Starting State)}{17}{section*.28}%
+\contentsline {section}{Phase 2: Single-Head Attention Pipeline}{17}{section*.29}%
+\contentsline {subsection}{Step 1: Initialization of Weight Matrices}{18}{section*.30}%
+\contentsline {subsection}{Step 2: Creating Q, K, and V}{18}{section*.31}%
+\contentsline {subsection}{Step 3: The Scaled Dot-Product Math}{18}{section*.32}%
+\contentsline {subsection}{Worked Example (one head, \(T = 3\), \(d_k = 2\), token 3 is \texttt {{[}PAD{]}})}{19}{section*.33}%
+\contentsline {section}{Phase 3: Multi-Head Attention (MHA) Pipeline}{19}{section*.34}%
+\contentsline {subsection}{Step 1: The Dimension Split}{19}{section*.35}%
+\contentsline {subsection}{Step 2: Unique Weight Initialization}{20}{section*.36}%
+\contentsline {subsection}{Step 3: Parallel Execution}{20}{section*.37}%
+\contentsline {subsection}{Step 4: Concatenation}{20}{section*.38}%
+\contentsline {subsection}{Step 5: The Final Linear Projection}{20}{section*.39}%
+\contentsline {subsection}{Parameter Count (per encoder block)}{21}{section*.40}%
+\contentsline {chapter}{\numberline {5}Add \& Norm (after Multi-Head Attention)}{22}{chapter.5}%
+\contentsline {section}{Phase 1: The "Add" Component (Residual Connections)}{22}{section*.41}%
+\contentsline {subsection}{Why Residual Connections are Critical}{22}{section*.42}%
+\contentsline {section}{Phase 2: The "Norm" Component (Layer Normalization)}{23}{section*.43}%
+\contentsline {subsection}{Why Layer Normalization Over Batch Normalization?}{23}{section*.44}%
+\contentsline {subsection}{The Mathematical Formulation}{23}{section*.45}%
+\contentsline {section}{Worked Example (\(d_{model} = 4\), one token)}{24}{section*.46}%
+\contentsline {section}{Phase 3: The Complete Add \& Norm Pipeline}{24}{section*.47}%
+\contentsline {chapter}{\numberline {6}Position-wise Feed-Forward Network (FFN)}{26}{chapter.6}%
+\contentsline {section}{1. The Core Architecture}{26}{section*.48}%
+\contentsline {section}{2. The Expansion and Compression Strategy}{26}{section*.49}%
+\contentsline {subsection}{Step 1: The Up-Projection (\(W_1\))}{27}{section*.50}%
+\contentsline {subsection}{Step 2: The Non-Linearity (ReLU)}{27}{section*.51}%
+\contentsline {subsection}{Step 3: The Down-Projection (\(W_2\))}{27}{section*.52}%
+\contentsline {section}{3. Worked Example (one token, \(d_{model} = 2\), \(d_{ff} = 4\))}{27}{section*.53}%
+\contentsline {section}{4. The Final Tensor Flow}{28}{section*.54}%
+\contentsline {subsection}{Parameter Count (per encoder block)}{28}{section*.55}%
+\contentsline {chapter}{\numberline {7}Second Add \& Norm (after the Feed-Forward Network)}{29}{chapter.7}%
+\contentsline {section}{1. The "Add" Component (Second Residual Connection)}{29}{section*.56}%
+\contentsline {subsection}{Why it is applied here}{29}{section*.57}%
+\contentsline {section}{2. The "Norm" Component (Second Layer Normalization)}{30}{section*.58}%
+\contentsline {section}{3. Worked Example (continuing the FFN example, \(d_{model} = 2\))}{30}{section*.59}%
+\contentsline {section}{4. Top-to-Bottom Flow of the Second Add \& Norm Layer}{30}{section*.60}%
+\contentsline {section}{Summary of the Entire Encoder Block Cycle}{31}{section*.61}%
+\contentsline {chapter}{\numberline {8}Linearization (LM Head) and Softmax}{32}{chapter.8}%
+\contentsline {section}{1. The Linearization and Softmax Head}{32}{section*.62}%
+\contentsline {subsection}{Step 1: The Linear Projection (Un-embedding)}{32}{section*.63}%
+\contentsline {subsection}{Step 2: The Softmax Layer}{33}{section*.64}%
+\contentsline {subsection}{Worked Example (one position, toy vocabulary of \(V = 4\))}{33}{section*.65}%
+\contentsline {section}{2. What Is the Target? (Masked Language Modelling)}{33}{section*.66}%
+\contentsline {subsection}{Cross-Entropy Loss}{34}{section*.67}%
+\contentsline {section}{3. Initial Guesses vs. Actual Training (Updating Embeddings)}{35}{section*.68}%
+\contentsline {subsection}{Where Does Actual Training Happen?}{35}{section*.69}%
+\contentsline {subsection}{Do Input Embeddings Update After the First Round?}{35}{section*.70}%
+\contentsline {subsection}{Parameter Count}{36}{section*.71}%
+\contentsline {chapter}{\numberline {9}End-to-End Encoder Pipeline}{37}{chapter.9}%
+\contentsline {section}{Complete End-to-End Transformer Encoder Pipeline}{37}{section*.72}%
+\contentsline {subsection}{Shapes at Every Stage (this project: \(B = 4\), \(T = 512\), \(d_{model} = 512\), \(h = 8\), \(d_k = 64\), \(d_{ff} = 2048\), \(V = 30000\))}{38}{section*.73}%
+\contentsline {section}{Stage 1: Input Embedding \& Positional Encoding}{38}{section*.74}%
+\contentsline {subsection}{1. Vocabulary Lookup}{38}{section*.75}%
+\contentsline {subsection}{2. Positional Encoding Addition}{38}{section*.76}%
+\contentsline {section}{Stage 2: The Stacked Encoder Blocks (\(1 \text { to } N\))}{38}{section*.77}%
+\contentsline {subsection}{1. Multi-Head Attention (MHA)}{39}{section*.78}%
+\contentsline {subsection}{2. First Add \& Norm}{39}{section*.79}%
+\contentsline {subsection}{3. Position-Wise Feed-Forward Network (FFN)}{39}{section*.80}%
+\contentsline {subsection}{4. Second Add \& Norm}{39}{section*.81}%
+\contentsline {section}{Stage 3: Sequential Block Passing}{40}{section*.82}%
+\contentsline {section}{Stage 4: Language Modeling Head}{40}{section*.83}%
+\contentsline {section}{Stage 5: Forward Pass vs. Training Updates (The Distinction)}{40}{section*.84}%
+\contentsline {section}{Project-Specific Training and Target Data Preparation Strategy}{41}{section*.85}%
+\contentsline {subsection}{1. The data}{41}{section*.86}%
+\contentsline {subsection}{2. Three kinds of "masking", and which ones we use}{41}{section*.87}%
+\contentsline {subsection}{3. Step A --- Build one sequence per sample}{42}{section*.88}%
+\contentsline {subsection}{4. Step B --- The attention mask: who may look at whom}{42}{section*.89}%
+\contentsline {subsection}{5. Step C --- Targets and the loss mask}{42}{section*.90}%
+\contentsline {subsection}{6. Worked example: a real batch with \(B = 2\)}{43}{section*.91}%
+\contentsline {subsection}{7. Inference uses the same layout}{43}{section*.92}%
+\contentsline {section}{One Training Step in This Project}{43}{section*.93}%
+\contentsline {section}{Total Parameter Count}{44}{section*.94}%
+\contentsline {chapter}{\numberline {10}Backpropagation: How Every Weight and Bias Gets Updated}{45}{chapter.10}%
+\contentsline {section}{0. The Big Picture}{45}{section*.95}%
+\contentsline {subsection}{Notation}{45}{section*.96}%
+\contentsline {subsection}{Forward saves, backward uses}{46}{section*.97}%
+\contentsline {subsection}{The order}{46}{section*.98}%
+\contentsline {subsection}{Every learnable parameter in the encoder}{46}{section*.99}%
+\contentsline {section}{1. Three Rules That Cover Everything}{46}{section*.100}%
+\contentsline {subsection}{Rule 1 --- The chain rule}{46}{section*.101}%
+\contentsline {subsection}{Rule 2 --- The linear layer (used 9 times per block + the LM head)}{46}{section*.102}%
+\contentsline {subsection}{Rule 3 --- Addition copies, re-use adds up}{47}{section*.103}%
+\contentsline {section}{2. Step 1 --- Loss and Softmax: \(d\mathbf {Z}\)}{47}{section*.104}%
+\contentsline {section}{3. Step 2 --- LM Head: \(W_{LM}\), \(b_{LM}\)}{48}{section*.105}%
+\contentsline {section}{4. Step 3 --- Second Add \& Norm: \(\mitgamma _2\), \(\mitbeta _2\)}{48}{section*.106}%
+\contentsline {subsection}{LayerNorm backward}{48}{section*.107}%
+\contentsline {subsection}{The addition}{49}{section*.108}%
+\contentsline {section}{5. Step 4 --- Feed-Forward Network: \(W_2\), \(b_2\), \(W_1\), \(b_1\)}{49}{section*.109}%
+\contentsline {section}{6. Step 5 --- First Add \& Norm: \(\mitgamma _1\), \(\mitbeta _1\)}{50}{section*.110}%
+\contentsline {section}{7. Step 6 --- Multi-Head Attention: \(W_O\), \(W_Q\), \(W_K\), \(W_V\)}{50}{section*.111}%
+\contentsline {section}{8. Step 7 --- Through the Stack of Blocks}{51}{section*.112}%
+\contentsline {section}{9. Step 8 --- Positional Encoding and Input Embedding: \(E\)}{52}{section*.113}%
+\contentsline {section}{10. Updating the Parameters}{52}{section*.114}%
+\contentsline {subsection}{Plain gradient descent (the idea)}{52}{section*.115}%
+\contentsline {subsection}{Adam (what this project uses)}{53}{section*.116}%
+\contentsline {subsection}{Gradient clipping (safety belt)}{53}{section*.117}%
+\contentsline {section}{11. Summary: Every Gradient in One Table}{53}{section*.118}%
+\contentsline {section}{12. How We Know the Formulas Are Right: Gradient Checking}{54}{section*.119}%

@@ -32,9 +32,9 @@ $$\mathbf{Z} = \mathbf{X}_{final} \cdot W_{LM} + b_{LM}$$
 | | General example | This project |
 | --- | --- | --- |
 | Input $\mathbf{X}_{final}$ | $(B, T, 512)$ | $(4, 512, 512)$ |
-| $W_{LM}$ | $(512, 50000)$ | $(512, 6302)$ |
-| $b_{LM}$ | $(50000)$ | $(6302)$ |
-| Output $\mathbf{Z}$ (logits) | $(B, T, 50000)$ | $(4, 512, 6302)$ |
+| $W_{LM}$ | $(512, 50000)$ | $(512, 30000)$ |
+| $b_{LM}$ | $(50000)$ | $(30000)$ |
+| Output $\mathbf{Z}$ (logits) | $(B, T, 50000)$ | $(4, 512, 30000)$ |
 
 The output values inside $\mathbf{Z}$ are called **Logits**. Every token position $t$ in every sentence now has an unnormalized score for every possible token in the vocabulary. Logits can be any real number (negative, zero, positive).
 
@@ -69,9 +69,11 @@ Each probability is $e^{z_i} / 11.580$. The model predicts "नेपाल".
 
 ## 2. What Is the Target? (Masked Language Modelling)
 
+> **This project's summarizer does not use MLM.** It trains the encoder as a prefix-LM: the input is `<s> article </s> summary </s>`, and the target at each summary position is the next summary token. See **"Project-Specific Training and Target Data Preparation Strategy"** in `8-end-to-end.md`. MLM is explained below because it is the classic encoder objective and was this project's earlier pre-training setup. The "score only $N$ positions" idea carries over unchanged.
+
 The loss compares the predicted probabilities with a **ground-truth token**. But an encoder sees the whole sentence at once — if we asked it to predict the token at position $t$ while that token is visible, it could simply copy its input and learn nothing.
 
-The standard solution for encoders (used by BERT, and by this project) is **Masked Language Modelling (MLM)**:
+The standard solution for encoders (used by BERT) is **Masked Language Modelling (MLM)**:
 
 1. Pick a random ~15% of the real (non-`[PAD]`) tokens in the batch.
 2. Replace them in the input with the special `<mask>` token (ID 4 in our vocabulary).
@@ -84,11 +86,11 @@ Input:      नेपाल  <mask>  देश  हो
 Target:       –    सुन्दर    –    –     ← loss only here
 ```
 
-Because only masked positions matter, the code runs the LM head on just those $N$ vectors: $(N, 512) \rightarrow (N, V)$ instead of $(B, T, 512) \rightarrow (B, T, V)$. With $B = 4$, $T = 512$ and 15% masking, $N \approx 307$ instead of $2048$ positions — about 85% less work, same learning signal.
+Because only masked positions matter, the code runs the LM head on just those $N$ vectors: $(N, 512) \rightarrow (N, V)$ instead of $(B, T, 512) \rightarrow (B, T, V)$. With $B = 4$, $T = 512$ and 15% masking, $N \approx 307$ instead of $2048$ positions — about 85% less work, same learning signal. In the summarizer, the $N$ positions are the summary positions instead, at most $B \times 256 = 1024$ per batch.
 
 ### Cross-Entropy Loss
 
-For each masked position, the loss is the negative log of the probability the model gave to the correct token; the batch loss is the average over the $N$ masked positions:
+For each scored position (masked token in MLM, summary token in the summarizer), the loss is the negative log of the probability the model gave to the correct token; the batch loss is the average over the $N$ scored positions:
 
 $$\mathcal{L} = -\frac{1}{N} \sum_{n=1}^{N} \log P(\text{target}_n)$$
 
@@ -97,7 +99,7 @@ With the toy example above:
 * If the true token is "नेपाल" ($P = 0.6381$): $\mathcal{L} = -\ln 0.6381 = 0.449$ (good prediction, small loss)
 * If the true token is "देश" ($P = 0.0954$): $\mathcal{L} = -\ln 0.0954 = 2.349$ (bad prediction, large loss)
 
-**Sanity check for this project:** an untrained model spreads probability evenly, $P \approx 1/6302$, so the first loss should be close to $\ln 6302 \approx 8.75$. Our first training step reports about $8.6$. ✅
+**Sanity check for this project:** an untrained model spreads probability evenly, $P \approx 1/30000$, so the first loss should be close to $\ln 30000 \approx 10.31$.
 
 ---
 
@@ -141,6 +143,6 @@ This project uses **Adam**, which adapts the step size per weight (AdamW is a va
 
 | Parameter | Shape | Numbers |
 | --- | --- | --- |
-| $W_{LM}$ | $512 \times 6302$ | 3,226,624 |
-| $b_{LM}$ | $6302$ | 6,302 |
-| **Total** | | **3,232,926** (only $b_{LM}$ if weights are tied) |
+| $W_{LM}$ | $512 \times 30000$ | 15,360,000 |
+| $b_{LM}$ | $30000$ | 30,000 |
+| **Total** | | **15,390,000** (only $b_{LM}$ if weights are tied) |
