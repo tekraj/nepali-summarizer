@@ -40,14 +40,14 @@ BACKWARD:  loss → softmax+CE → LM head → [Block 6] → … → [Block 1] �
 
 | # | Parameter | Where | Shape | Count |
 | --- | --- | --- | --- | --- |
-| 1 | $E$ | Input embedding | $(6302, 512)$ | 3,226,624 |
+| 1 | $E$ | Input embedding | $(30000, 512)$ | 15,360,000 |
 | 2–5 | $W_Q, W_K, W_V, W_O$ | Attention (×6 blocks) | $(512, 512)$ each | 262,144 each |
 | 6–7 | $\gamma_1, \beta_1$ | Add & Norm 1 (×6) | $(512)$ each | 512 each |
 | 8–9 | $W_1, b_1$ | FFN (×6) | $(512, 2048)$, $(2048)$ | 1,048,576 + 2,048 |
 | 10–11 | $W_2, b_2$ | FFN (×6) | $(2048, 512)$, $(512)$ | 1,048,576 + 512 |
 | 12–13 | $\gamma_2, \beta_2$ | Add & Norm 2 (×6) | $(512)$ each | 512 each |
-| 14–15 | $W_{LM}, b_{LM}$ | LM head | $(512, 6302)$, $(6302)$ | 3,226,624 + 6,302 |
-| | **Total** | | | **25,361,566** |
+| 14–15 | $W_{LM}, b_{LM}$ | LM head | $(512, 30000)$, $(30000)$ | 15,360,000 + 30,000 |
+| | **Total** | | | **49,652,016** |
 
 The positional encoding $PE$ is fixed, so it has **no** gradient to compute. Each of the 6 blocks has its own copy of parameters 2–13, and each copy gets its own gradient.
 

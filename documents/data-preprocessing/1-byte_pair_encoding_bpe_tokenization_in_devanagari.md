@@ -88,7 +88,7 @@ The tokenizer replaces every occurrence of the merged pair with the new single t
 
 This loop repeats until the vocabulary reaches the target size, or until no pair is frequent enough (our training requires a pair to appear at least twice, `min_frequency=2`).
 
-> **This project:** the target was $30,000$, but on our corpus the loop stopped at **$6,302$ tokens** ($V = 6302$). Large models use $32,000$–$50,000$ or more, trained on far more text.
+> **This project:** trained on our ~132,000 cleaned Nepali news articles, the loop reaches the full target of **$30,000$ tokens** ($V = 30000$: 5 special tokens + 256 bytes + 29,739 merges). Large models use $32,000$–$50,000$ or more.
 
 ---
 
@@ -107,7 +107,7 @@ Input Text: "नेपाल"
 2. Merge Rules      ──► Applies merges from `merges.txt` in the order they were learned
       │
       ▼
-3. Final IDs        ──► [267, 270, 282, 264, 272]
+3. Final IDs        ──► [267, 270, 281, 264, 272]
                           न    े    प    ा    ल
 ```
 
@@ -115,16 +115,16 @@ Input Text: "नेपाल"
 2. **Applying Merge Rules:** The tokenizer executes learned merges in the exact order they were created during training.
 3. **Final ID Output:** Merged chunks are replaced with their integer IDs from `vocab.json`. These IDs are passed into the model's **Embedding Layer** (`encoders/1-input_embedding.md`).
 
-With our small vocabulary, "नेपाल" becomes one token per character. More frequent sequences do become single tokens — e.g. in **"नेपाल सरकार"** the piece " सरक" (space + स + र + क) is a single token (ID 405):
+Even with $30,000$ tokens, "नेपाल" becomes one token per character. Runs of consonants do become single tokens. For example, in **"नेपाल सरकार"** the piece " सरक" (space + स + र + क) is a single token (ID 413):
 
 | Text | Token IDs | Count |
 | --- | --- | --- |
 | न | `[267]` | 1 |
-| नेपाल | `[267, 270, 282, 264, 272]` | 5 |
-| नेपाल सरकार | `[267, 270, 282, 264, 272, 405, 264, 266]` | 8 (31 bytes) |
-| काठमाडौं | `[268, 264, 463, 264, 314, 397]` | 6 (24 bytes) |
+| नेपाल | `[267, 270, 281, 264, 272]` | 5 |
+| नेपाल सरकार | `[267, 270, 281, 264, 272, 413, 264, 266]` | 8 (31 bytes) |
+| काठमाडौं | `[268, 264, 502, 264, 316, 442]` | 6 (24 bytes) |
 
-A bigger vocabulary (more training text) would merge whole common words like नेपाल into a single token, making sequences shorter.
+> **Why a bigger vocabulary does not merge whole words here:** before BPE runs, `ByteLevelBPETokenizer` pre-splits text with the GPT-2 regex, which groups letters with `\p{L}+`. Devanagari vowel signs (matras such as े and ा) and the anusvara ं are Unicode *marks* (categories `Mn`/`Mc`), not letters. So "नेपाल" is cut into `न | े | प | ा | ल` before any merging, and BPE can never merge across a matra. That is why the learned tokens are consonant runs like " सरक", and why our corpus averages only about 1.5 characters per token. A pre-tokenizer that keeps letters and marks together (e.g. splitting on `\s?[\p{L}\p{M}]+`) would let common words like नेपाल become single tokens and make sequences shorter.
 
 ---
 

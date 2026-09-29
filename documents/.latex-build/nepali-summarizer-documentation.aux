@@ -1,0 +1,434 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand*\HyPL@Entry[1]{}
+\HyPL@Entry{0<</S/D>>}
+\providecommand \oddpage@label [2]{}
+\HyPL@Entry{1<</S/D>>}
+\@writefile{toc}{\contentsline {part}{I\hspace  {1em}Data Preprocessing}{3}{part.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {1}Byte-Pair Encoding (BPE) Tokenization for Devanagari Text}{4}{chapter.1}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{byte-pair-encoding-bpe-tokenization-for-devanagari-text}{{1}{4}{Byte-Pair Encoding (BPE) Tokenization for Devanagari Text}{chapter.1}{}}
+\@writefile{toc}{\contentsline {section}{Architecture Overview}{4}{section*.2}\protected@file@percent }
+\newlabel{architecture-overview}{{1}{4}{Architecture Overview}{section*.2}{}}
+\@writefile{toc}{\contentsline {section}{Phase 1: Training the Tokenizer (Building the Dictionary)}{4}{section*.3}\protected@file@percent }
+\newlabel{phase-1-training-the-tokenizer-building-the-dictionary}{{1}{4}{Phase 1: Training the Tokenizer (Building the Dictionary)}{section*.3}{}}
+\@writefile{toc}{\contentsline {subsection}{1. Base Initialization (Special Tokens + The 256 Bytes)}{4}{section*.4}\protected@file@percent }
+\newlabel{1-base-initialization-special-tokens--the-256-bytes}{{1}{4}{1. Base Initialization (Special Tokens + The 256 Bytes)}{section*.4}{}}
+\gdef \LT@i {\LT@entry 
+    {3}{64.14302pt}\LT@entry 
+    {3}{94.62535pt}\LT@entry 
+    {3}{266.16461pt}}
+\@writefile{toc}{\contentsline {subsection}{2. Raw Byte Breakdown}{5}{section*.5}\protected@file@percent }
+\newlabel{2-raw-byte-breakdown}{{1}{5}{2. Raw Byte Breakdown}{section*.5}{}}
+\@writefile{toc}{\contentsline {subsection}{3. Frequency Counting}{5}{section*.6}\protected@file@percent }
+\newlabel{3-frequency-counting}{{1}{5}{3. Frequency Counting}{section*.6}{}}
+\@writefile{toc}{\contentsline {subsection}{4. Statistical Merging}{5}{section*.7}\protected@file@percent }
+\newlabel{4-statistical-merging}{{1}{5}{4. Statistical Merging}{section*.7}{}}
+\@writefile{toc}{\contentsline {subsection}{5. Dictionary Mapping}{5}{section*.8}\protected@file@percent }
+\newlabel{5-dictionary-mapping}{{1}{5}{5. Dictionary Mapping}{section*.8}{}}
+\gdef \LT@ii {\LT@entry 
+    {3}{53.86037pt}\LT@entry 
+    {3}{236.14491pt}\LT@entry 
+    {3}{68.79568pt}}
+\@writefile{toc}{\contentsline {subsection}{6. Iteration and Expansion}{6}{section*.9}\protected@file@percent }
+\newlabel{6-iteration-and-expansion}{{1}{6}{6. Iteration and Expansion}{section*.9}{}}
+\@writefile{toc}{\contentsline {section}{Phase 2: Tokenization (Encoding New Input)}{6}{section*.10}\protected@file@percent }
+\newlabel{phase-2-tokenization-encoding-new-input}{{1}{6}{Phase 2: Tokenization (Encoding New Input)}{section*.10}{}}
+\@writefile{toc}{\contentsline {section}{Phase 3: Decoding (Translating Back to Human Text)}{7}{section*.11}\protected@file@percent }
+\newlabel{phase-3-decoding-translating-back-to-human-text}{{1}{7}{Phase 3: Decoding (Translating Back to Human Text)}{section*.11}{}}
+\@writefile{toc}{\contentsline {part}{II\hspace  {1em}The Transformer Encoder}{8}{part.2}\protected@file@percent }
+\gdef \LT@iii {\LT@entry 
+    {3}{117.03654pt}\LT@entry 
+    {3}{84.85658pt}\LT@entry 
+    {3}{95.2345pt}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {2}Transformer Input Embedding Layer}{9}{chapter.2}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{transformer-input-embedding-layer}{{2}{9}{Transformer Input Embedding Layer}{chapter.2}{}}
+\@writefile{toc}{\contentsline {section}{1. Matrix Architecture \& Dimensions}{9}{section*.12}\protected@file@percent }
+\newlabel{1-matrix-architecture--dimensions}{{2}{9}{1. Matrix Architecture \& Dimensions}{section*.12}{}}
+\@writefile{toc}{\contentsline {section}{2. Initialization \& Theoretical Foundations}{10}{section*.13}\protected@file@percent }
+\newlabel{2-initialization--theoretical-foundations}{{2}{10}{2. Initialization \& Theoretical Foundations}{section*.13}{}}
+\@writefile{toc}{\contentsline {subsection}{Why \(\mitsigma = 0.02\) is Used}{10}{section*.14}\protected@file@percent }
+\newlabel{why-sigma--002-is-used}{{2}{10}{\texorpdfstring {Why \(\sigma = 0.02\) is Used}{Why \textbackslash sigma = 0.02 is Used}}{section*.14}{}}
+\@writefile{toc}{\contentsline {section}{3. The Step-by-Step Pipeline}{10}{section*.15}\protected@file@percent }
+\newlabel{3-the-step-by-step-pipeline}{{2}{10}{3. The Step-by-Step Pipeline}{section*.15}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 1: Matrix Lookup}{10}{section*.16}\protected@file@percent }
+\newlabel{step-1-matrix-lookup}{{2}{10}{Step 1: Matrix Lookup}{section*.16}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 2: Vector Scaling by \(\sqrt  {d_{\text  {model}}}\)}{10}{section*.17}\protected@file@percent }
+\newlabel{step-2-vector-scaling-by-sqrtd_textmodel}{{2}{10}{\texorpdfstring {Step 2: Vector Scaling by \(\sqrt {d_{\text {model}}}\)}{Step 2: Vector Scaling by \textbackslash sqrt\{d\_\{\textbackslash text\{model\}\}\}}}{section*.17}{}}
+\gdef \LT@iv {\LT@entry 
+    {1}{53.30882pt}\LT@entry 
+    {3}{151.7772pt}\LT@entry 
+    {3}{145.7772pt}}
+\@writefile{toc}{\contentsline {subsection}{Worked Example (tiny numbers)}{11}{section*.18}\protected@file@percent }
+\newlabel{worked-example-tiny-numbers}{{2}{11}{Worked Example (tiny numbers)}{section*.18}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 3: Acquiring Meaning via Backpropagation}{11}{section*.19}\protected@file@percent }
+\newlabel{step-3-acquiring-meaning-via-backpropagation}{{2}{11}{Step 3: Acquiring Meaning via Backpropagation}{section*.19}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {3}The Complete Positional Encoding \& Input Preparation Pipeline}{12}{chapter.3}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{the-complete-positional-encoding--input-preparation-pipeline}{{3}{12}{The Complete Positional Encoding \& Input Preparation Pipeline}{chapter.3}{}}
+\@writefile{toc}{\contentsline {section}{1. Mathematical Generation of Positional Encodings}{12}{section*.20}\protected@file@percent }
+\newlabel{1-mathematical-generation-of-positional-encodings}{{3}{12}{1. Mathematical Generation of Positional Encodings}{section*.20}{}}
+\gdef \LT@v {\LT@entry 
+    {1}{28.32706pt}\LT@entry 
+    {1}{96.66615pt}\LT@entry 
+    {1}{98.72836pt}\LT@entry 
+    {1}{122.50816pt}\LT@entry 
+    {1}{118.57037pt}}
+\@writefile{toc}{\contentsline {subsection}{Worked Example: \(PE\) for \(d_{\text  {model}} = 4\)}{13}{section*.21}\protected@file@percent }
+\newlabel{worked-example-pe-for-d_textmodel--4}{{3}{13}{\texorpdfstring {Worked Example: \(PE\) for \(d_{\text {model}} = 4\)}{Worked Example: PE for d\_\{\textbackslash text\{model\}\} = 4}}{section*.21}{}}
+\@writefile{toc}{\contentsline {section}{2. Element-Wise Addition for Single Sequences}{13}{section*.22}\protected@file@percent }
+\newlabel{2-element-wise-addition-for-single-sequences}{{3}{13}{2. Element-Wise Addition for Single Sequences}{section*.22}{}}
+\gdef \LT@vi {\LT@entry 
+    {1}{53.14117pt}\LT@entry 
+    {1}{123.42696pt}\LT@entry 
+    {1}{144.85123pt}\LT@entry 
+    {1}{138.85123pt}}
+\@writefile{toc}{\contentsline {subsection}{Worked Example (continuing from \texttt  {1-input\_\allowbreak  {}embedding.\allowbreak  {}md})}{14}{section*.23}\protected@file@percent }
+\newlabel{worked-example-continuing-from-1-input_embeddingmd}{{3}{14}{\texorpdfstring {Worked Example (continuing from \texttt {1-input\_\allowbreak {}embedding.\allowbreak {}md})}{Worked Example (continuing from 1-input\_embedding.md)}}{section*.23}{}}
+\@writefile{toc}{\contentsline {section}{3. Batching Multiple Sequences (3D Tensors)}{14}{section*.24}\protected@file@percent }
+\newlabel{3-batching-multiple-sequences-3d-tensors}{{3}{14}{3. Batching Multiple Sequences (3D Tensors)}{section*.24}{}}
+\@writefile{toc}{\contentsline {section}{4. Padding Variable-Length Sequences}{14}{section*.25}\protected@file@percent }
+\newlabel{4-padding-variable-length-sequences}{{3}{14}{4. Padding Variable-Length Sequences}{section*.25}{}}
+\gdef \LT@vii {\LT@entry 
+    {3}{128.25421pt}\LT@entry 
+    {3}{48.39844pt}\LT@entry 
+    {3}{48.39844pt}\LT@entry 
+    {3}{48.39844pt}\LT@entry 
+    {1}{73.70288pt}}
+\@writefile{toc}{\contentsline {section}{5. Applying the Attention Mask}{15}{section*.26}\protected@file@percent }
+\newlabel{5-applying-the-attention-mask}{{3}{15}{5. Applying the Attention Mask}{section*.26}{}}
+\@writefile{toc}{\contentsline {subsection}{Worked Example}{15}{section*.27}\protected@file@percent }
+\newlabel{worked-example}{{3}{15}{Worked Example}{section*.27}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Multi-Head Self-Attention}{17}{chapter.4}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{multi-head-self-attention}{{4}{17}{Multi-Head Self-Attention}{chapter.4}{}}
+\@writefile{toc}{\contentsline {section}{Phase 1: Data Ingestion (The Starting State)}{17}{section*.28}\protected@file@percent }
+\newlabel{phase-1-data-ingestion-the-starting-state}{{4}{17}{Phase 1: Data Ingestion (The Starting State)}{section*.28}{}}
+\@writefile{toc}{\contentsline {section}{Phase 2: Single-Head Attention Pipeline}{17}{section*.29}\protected@file@percent }
+\newlabel{phase-2-single-head-attention-pipeline}{{4}{17}{Phase 2: Single-Head Attention Pipeline}{section*.29}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 1: Initialization of Weight Matrices}{18}{section*.30}\protected@file@percent }
+\newlabel{step-1-initialization-of-weight-matrices}{{4}{18}{Step 1: Initialization of Weight Matrices}{section*.30}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 2: Creating Q, K, and V}{18}{section*.31}\protected@file@percent }
+\newlabel{step-2-creating-q-k-and-v}{{4}{18}{Step 2: Creating Q, K, and V}{section*.31}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 3: The Scaled Dot-Product Math}{18}{section*.32}\protected@file@percent }
+\newlabel{step-3-the-scaled-dot-product-math}{{4}{18}{Step 3: The Scaled Dot-Product Math}{section*.32}{}}
+\@writefile{toc}{\contentsline {subsection}{Worked Example (one head, \(T = 3\), \(d_k = 2\), token 3 is \texttt  {{[}PAD{]}})}{19}{section*.33}\protected@file@percent }
+\newlabel{worked-example-one-head-t--3-d_k--2-token-3-is-pad}{{4}{19}{\texorpdfstring {Worked Example (one head, \(T = 3\), \(d_k = 2\), token 3 is \texttt {{[}PAD{]}})}{Worked Example (one head, T = 3, d\_k = 2, token 3 is {[}PAD{]})}}{section*.33}{}}
+\@writefile{toc}{\contentsline {section}{Phase 3: Multi-Head Attention (MHA) Pipeline}{19}{section*.34}\protected@file@percent }
+\newlabel{phase-3-multi-head-attention-mha-pipeline}{{4}{19}{Phase 3: Multi-Head Attention (MHA) Pipeline}{section*.34}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 1: The Dimension Split}{19}{section*.35}\protected@file@percent }
+\newlabel{step-1-the-dimension-split}{{4}{19}{Step 1: The Dimension Split}{section*.35}{}}
+\gdef \LT@viii {\LT@entry 
+    {3}{177.0868pt}\LT@entry 
+    {3}{78.22234pt}\LT@entry 
+    {1}{145.54681pt}}
+\@writefile{toc}{\contentsline {subsection}{Step 2: Unique Weight Initialization}{20}{section*.36}\protected@file@percent }
+\newlabel{step-2-unique-weight-initialization}{{4}{20}{Step 2: Unique Weight Initialization}{section*.36}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 3: Parallel Execution}{20}{section*.37}\protected@file@percent }
+\newlabel{step-3-parallel-execution}{{4}{20}{Step 3: Parallel Execution}{section*.37}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 4: Concatenation}{20}{section*.38}\protected@file@percent }
+\newlabel{step-4-concatenation}{{4}{20}{Step 4: Concatenation}{section*.38}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 5: The Final Linear Projection}{20}{section*.39}\protected@file@percent }
+\newlabel{step-5-the-final-linear-projection}{{4}{20}{Step 5: The Final Linear Projection}{section*.39}{}}
+\gdef \LT@ix {\LT@entry 
+    {3}{135.42776pt}\LT@entry 
+    {3}{65.89024pt}\LT@entry 
+    {3}{63.90936pt}}
+\@writefile{toc}{\contentsline {subsection}{Parameter Count (per encoder block)}{21}{section*.40}\protected@file@percent }
+\newlabel{parameter-count-per-encoder-block}{{4}{21}{Parameter Count (per encoder block)}{section*.40}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}Add \& Norm (after Multi-Head Attention)}{22}{chapter.5}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{add--norm-after-multi-head-attention}{{5}{22}{Add \& Norm (after Multi-Head Attention)}{chapter.5}{}}
+\@writefile{toc}{\contentsline {section}{Phase 1: The "Add" Component (Residual Connections)}{22}{section*.41}\protected@file@percent }
+\newlabel{phase-1-the-add-component-residual-connections}{{5}{22}{Phase 1: The "Add" Component (Residual Connections)}{section*.41}{}}
+\@writefile{toc}{\contentsline {subsection}{Why Residual Connections are Critical}{22}{section*.42}\protected@file@percent }
+\newlabel{why-residual-connections-are-critical}{{5}{22}{Why Residual Connections are Critical}{section*.42}{}}
+\@writefile{toc}{\contentsline {section}{Phase 2: The "Norm" Component (Layer Normalization)}{23}{section*.43}\protected@file@percent }
+\newlabel{phase-2-the-norm-component-layer-normalization}{{5}{23}{Phase 2: The "Norm" Component (Layer Normalization)}{section*.43}{}}
+\@writefile{toc}{\contentsline {subsection}{Why Layer Normalization Over Batch Normalization?}{23}{section*.44}\protected@file@percent }
+\newlabel{why-layer-normalization-over-batch-normalization}{{5}{23}{Why Layer Normalization Over Batch Normalization?}{section*.44}{}}
+\@writefile{toc}{\contentsline {subsection}{The Mathematical Formulation}{23}{section*.45}\protected@file@percent }
+\newlabel{the-mathematical-formulation}{{5}{23}{The Mathematical Formulation}{section*.45}{}}
+\gdef \LT@x {\LT@entry 
+    {3}{114.42325pt}\LT@entry 
+    {1}{41.77501pt}\LT@entry 
+    {1}{41.77501pt}\LT@entry 
+    {1}{41.77501pt}\LT@entry 
+    {1}{35.77501pt}}
+\gdef \LT@xi {\LT@entry 
+    {3}{156.01523pt}\LT@entry 
+    {3}{57.11455pt}\LT@entry 
+    {3}{57.11455pt}\LT@entry 
+    {3}{48.39844pt}\LT@entry 
+    {3}{42.39844pt}}
+\@writefile{toc}{\contentsline {section}{Worked Example (\(d_{model} = 4\), one token)}{24}{section*.46}\protected@file@percent }
+\newlabel{worked-example-d_model--4-one-token}{{5}{24}{\texorpdfstring {Worked Example (\(d_{model} = 4\), one token)}{Worked Example (d\_\{model\} = 4, one token)}}{section*.46}{}}
+\@writefile{toc}{\contentsline {section}{Phase 3: The Complete Add \& Norm Pipeline}{24}{section*.47}\protected@file@percent }
+\newlabel{phase-3-the-complete-add--norm-pipeline}{{5}{24}{Phase 3: The Complete Add \& Norm Pipeline}{section*.47}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {6}Position-wise Feed-Forward Network (FFN)}{26}{chapter.6}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{position-wise-feed-forward-network-ffn}{{6}{26}{Position-wise Feed-Forward Network (FFN)}{chapter.6}{}}
+\@writefile{toc}{\contentsline {section}{1. The Core Architecture}{26}{section*.48}\protected@file@percent }
+\newlabel{1-the-core-architecture}{{6}{26}{1. The Core Architecture}{section*.48}{}}
+\@writefile{toc}{\contentsline {section}{2. The Expansion and Compression Strategy}{26}{section*.49}\protected@file@percent }
+\newlabel{2-the-expansion-and-compression-strategy}{{6}{26}{2. The Expansion and Compression Strategy}{section*.49}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 1: The Up-Projection (\(W_1\))}{27}{section*.50}\protected@file@percent }
+\newlabel{step-1-the-up-projection-w_1}{{6}{27}{\texorpdfstring {Step 1: The Up-Projection (\(W_1\))}{Step 1: The Up-Projection (W\_1)}}{section*.50}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 2: The Non-Linearity (ReLU)}{27}{section*.51}\protected@file@percent }
+\newlabel{step-2-the-non-linearity-relu}{{6}{27}{Step 2: The Non-Linearity (ReLU)}{section*.51}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 3: The Down-Projection (\(W_2\))}{27}{section*.52}\protected@file@percent }
+\newlabel{step-3-the-down-projection-w_2}{{6}{27}{\texorpdfstring {Step 3: The Down-Projection (\(W_2\))}{Step 3: The Down-Projection (W\_2)}}{section*.52}{}}
+\@writefile{toc}{\contentsline {section}{3. Worked Example (one token, \(d_{model} = 2\), \(d_{ff} = 4\))}{27}{section*.53}\protected@file@percent }
+\newlabel{3-worked-example-one-token-d_model--2-d_ff--4}{{6}{27}{\texorpdfstring {3. Worked Example (one token, \(d_{model} = 2\), \(d_{ff} = 4\))}{3. Worked Example (one token, d\_\{model\} = 2, d\_\{ff\} = 4)}}{section*.53}{}}
+\gdef \LT@xii {\LT@entry 
+    {1}{26.90651pt}\LT@entry 
+    {3}{146.59657pt}\LT@entry 
+    {1}{42.20035pt}}
+\gdef \LT@xiii {\LT@entry 
+    {1}{61.23764pt}\LT@entry 
+    {3}{72.85445pt}\LT@entry 
+    {3}{63.90936pt}}
+\@writefile{toc}{\contentsline {section}{4. The Final Tensor Flow}{28}{section*.54}\protected@file@percent }
+\newlabel{4-the-final-tensor-flow}{{6}{28}{4. The Final Tensor Flow}{section*.54}{}}
+\@writefile{toc}{\contentsline {subsection}{Parameter Count (per encoder block)}{28}{section*.55}\protected@file@percent }
+\newlabel{parameter-count-per-encoder-block}{{6}{28}{Parameter Count (per encoder block)}{section*.55}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {7}Second Add \& Norm (after the Feed-Forward Network)}{29}{chapter.7}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{second-add--norm-after-the-feed-forward-network}{{7}{29}{Second Add \& Norm (after the Feed-Forward Network)}{chapter.7}{}}
+\@writefile{toc}{\contentsline {section}{1. The "Add" Component (Second Residual Connection)}{29}{section*.56}\protected@file@percent }
+\newlabel{1-the-add-component-second-residual-connection}{{7}{29}{1. The "Add" Component (Second Residual Connection)}{section*.56}{}}
+\@writefile{toc}{\contentsline {subsection}{Why it is applied here}{29}{section*.57}\protected@file@percent }
+\newlabel{why-it-is-applied-here}{{7}{29}{Why it is applied here}{section*.57}{}}
+\@writefile{toc}{\contentsline {section}{2. The "Norm" Component (Second Layer Normalization)}{30}{section*.58}\protected@file@percent }
+\newlabel{2-the-norm-component-second-layer-normalization}{{7}{30}{2. The "Norm" Component (Second Layer Normalization)}{section*.58}{}}
+\@writefile{toc}{\contentsline {section}{3. Worked Example (continuing the FFN example, \(d_{model} = 2\))}{30}{section*.59}\protected@file@percent }
+\newlabel{3-worked-example-continuing-the-ffn-example-d_model--2}{{7}{30}{\texorpdfstring {3. Worked Example (continuing the FFN example, \(d_{model} = 2\))}{3. Worked Example (continuing the FFN example, d\_\{model\} = 2)}}{section*.59}{}}
+\@writefile{toc}{\contentsline {section}{4. Top-to-Bottom Flow of the Second Add \& Norm Layer}{30}{section*.60}\protected@file@percent }
+\newlabel{4-top-to-bottom-flow-of-the-second-add--norm-layer}{{7}{30}{4. Top-to-Bottom Flow of the Second Add \& Norm Layer}{section*.60}{}}
+\gdef \LT@xiv {\LT@entry 
+    {3}{118.11081pt}\LT@entry 
+    {1}{129.29172pt}\LT@entry 
+    {3}{63.90936pt}}
+\@writefile{toc}{\contentsline {section}{Summary of the Entire Encoder Block Cycle}{31}{section*.61}\protected@file@percent }
+\newlabel{summary-of-the-entire-encoder-block-cycle}{{7}{31}{Summary of the Entire Encoder Block Cycle}{section*.61}{}}
+\gdef \LT@xv {\LT@entry 
+    {3}{94.36497pt}\LT@entry 
+    {1}{101.36052pt}\LT@entry 
+    {3}{88.55602pt}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {8}Linearization (LM Head) and Softmax}{32}{chapter.8}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{linearization-lm-head-and-softmax}{{8}{32}{Linearization (LM Head) and Softmax}{chapter.8}{}}
+\@writefile{toc}{\contentsline {section}{1. The Linearization and Softmax Head}{32}{section*.62}\protected@file@percent }
+\newlabel{1-the-linearization-and-softmax-head}{{8}{32}{1. The Linearization and Softmax Head}{section*.62}{}}
+\@writefile{toc}{\contentsline {subsection}{Step 1: The Linear Projection (Un-embedding)}{32}{section*.63}\protected@file@percent }
+\newlabel{step-1-the-linear-projection-un-embedding}{{8}{32}{Step 1: The Linear Projection (Un-embedding)}{section*.63}{}}
+\gdef \LT@xvi {\LT@entry 
+    {3}{36.71286pt}\LT@entry 
+    {1}{51.06671pt}\LT@entry 
+    {3}{48.39844pt}\LT@entry 
+    {1}{99.97307pt}}
+\@writefile{toc}{\contentsline {subsection}{Step 2: The Softmax Layer}{33}{section*.64}\protected@file@percent }
+\newlabel{step-2-the-softmax-layer}{{8}{33}{Step 2: The Softmax Layer}{section*.64}{}}
+\@writefile{toc}{\contentsline {subsection}{Worked Example (one position, toy vocabulary of \(V = 4\))}{33}{section*.65}\protected@file@percent }
+\newlabel{worked-example-one-position-toy-vocabulary-of-v--4}{{8}{33}{\texorpdfstring {Worked Example (one position, toy vocabulary of \(V = 4\))}{Worked Example (one position, toy vocabulary of V = 4)}}{section*.65}{}}
+\@writefile{toc}{\contentsline {section}{2. What Is the Target? (Masked Language Modelling)}{33}{section*.66}\protected@file@percent }
+\newlabel{2-what-is-the-target-masked-language-modelling}{{8}{33}{2. What Is the Target? (Masked Language Modelling)}{section*.66}{}}
+\@writefile{toc}{\contentsline {subsection}{Cross-Entropy Loss}{34}{section*.67}\protected@file@percent }
+\newlabel{cross-entropy-loss}{{8}{34}{Cross-Entropy Loss}{section*.67}{}}
+\@writefile{toc}{\contentsline {section}{3. Initial Guesses vs. Actual Training (Updating Embeddings)}{35}{section*.68}\protected@file@percent }
+\newlabel{3-initial-guesses-vs-actual-training-updating-embeddings}{{8}{35}{3. Initial Guesses vs. Actual Training (Updating Embeddings)}{section*.68}{}}
+\@writefile{toc}{\contentsline {subsection}{Where Does Actual Training Happen?}{35}{section*.69}\protected@file@percent }
+\newlabel{where-does-actual-training-happen}{{8}{35}{Where Does Actual Training Happen?}{section*.69}{}}
+\@writefile{toc}{\contentsline {subsection}{Do Input Embeddings Update After the First Round?}{35}{section*.70}\protected@file@percent }
+\newlabel{do-input-embeddings-update-after-the-first-round}{{8}{35}{Do Input Embeddings Update After the First Round?}{section*.70}{}}
+\gdef \LT@xvii {\LT@entry 
+    {1}{61.23764pt}\LT@entry 
+    {3}{79.81865pt}\LT@entry 
+    {3}{235.08414pt}}
+\@writefile{toc}{\contentsline {subsection}{Parameter Count}{36}{section*.71}\protected@file@percent }
+\newlabel{parameter-count}{{8}{36}{Parameter Count}{section*.71}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {9}End-to-End Encoder Pipeline}{37}{chapter.9}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{end-to-end-encoder-pipeline}{{9}{37}{End-to-End Encoder Pipeline}{chapter.9}{}}
+\@writefile{toc}{\contentsline {section}{Complete End-to-End Transformer Encoder Pipeline}{37}{section*.72}\protected@file@percent }
+\newlabel{complete-end-to-end-transformer-encoder-pipeline}{{9}{37}{Complete End-to-End Transformer Encoder Pipeline}{section*.72}{}}
+\gdef \LT@xviii {\LT@entry 
+    {3}{109.10008pt}\LT@entry 
+    {3}{117.60928pt}\LT@entry 
+    {3}{93.16162pt}\LT@entry 
+    {3}{88.55602pt}}
+\@writefile{toc}{\contentsline {subsection}{Shapes at Every Stage (this project: \(B = 4\), \(T = 512\), \(d_{model} = 512\), \(h = 8\), \(d_k = 64\), \(d_{ff} = 2048\), \(V = 30000\))}{38}{section*.73}\protected@file@percent }
+\newlabel{shapes-at-every-stage-this-project-b--4-t--512-d_model--512-h--8-d_k--64-d_ff--2048-v--30000}{{9}{38}{\texorpdfstring {Shapes at Every Stage (this project: \(B = 4\), \(T = 512\), \(d_{model} = 512\), \(h = 8\), \(d_k = 64\), \(d_{ff} = 2048\), \(V = 30000\))}{Shapes at Every Stage (this project: B = 4, T = 512, d\_\{model\} = 512, h = 8, d\_k = 64, d\_\{ff\} = 2048, V = 30000)}}{section*.73}{}}
+\@writefile{toc}{\contentsline {section}{Stage 1: Input Embedding \& Positional Encoding}{38}{section*.74}\protected@file@percent }
+\newlabel{stage-1-input-embedding--positional-encoding}{{9}{38}{Stage 1: Input Embedding \& Positional Encoding}{section*.74}{}}
+\@writefile{toc}{\contentsline {subsection}{1. Vocabulary Lookup}{38}{section*.75}\protected@file@percent }
+\newlabel{1-vocabulary-lookup}{{9}{38}{1. Vocabulary Lookup}{section*.75}{}}
+\@writefile{toc}{\contentsline {subsection}{2. Positional Encoding Addition}{38}{section*.76}\protected@file@percent }
+\newlabel{2-positional-encoding-addition}{{9}{38}{2. Positional Encoding Addition}{section*.76}{}}
+\@writefile{toc}{\contentsline {section}{Stage 2: The Stacked Encoder Blocks (\(1 \text  { to } N\))}{38}{section*.77}\protected@file@percent }
+\newlabel{stage-2-the-stacked-encoder-blocks-1-text-to--n}{{9}{38}{\texorpdfstring {Stage 2: The Stacked Encoder Blocks (\(1 \text { to } N\))}{Stage 2: The Stacked Encoder Blocks (1 \textbackslash text\{ to \} N)}}{section*.77}{}}
+\@writefile{toc}{\contentsline {subsection}{1. Multi-Head Attention (MHA)}{39}{section*.78}\protected@file@percent }
+\newlabel{1-multi-head-attention-mha}{{9}{39}{1. Multi-Head Attention (MHA)}{section*.78}{}}
+\@writefile{toc}{\contentsline {subsection}{2. First Add \& Norm}{39}{section*.79}\protected@file@percent }
+\newlabel{2-first-add--norm}{{9}{39}{2. First Add \& Norm}{section*.79}{}}
+\@writefile{toc}{\contentsline {subsection}{3. Position-Wise Feed-Forward Network (FFN)}{39}{section*.80}\protected@file@percent }
+\newlabel{3-position-wise-feed-forward-network-ffn}{{9}{39}{3. Position-Wise Feed-Forward Network (FFN)}{section*.80}{}}
+\@writefile{toc}{\contentsline {subsection}{4. Second Add \& Norm}{39}{section*.81}\protected@file@percent }
+\newlabel{4-second-add--norm}{{9}{39}{4. Second Add \& Norm}{section*.81}{}}
+\gdef \LT@xix {\LT@entry 
+    {1}{44.83408pt}\LT@entry 
+    {1}{202.40887pt}\LT@entry 
+    {1}{213.07297pt}}
+\@writefile{toc}{\contentsline {section}{Stage 3: Sequential Block Passing}{40}{section*.82}\protected@file@percent }
+\newlabel{stage-3-sequential-block-passing}{{9}{40}{Stage 3: Sequential Block Passing}{section*.82}{}}
+\@writefile{toc}{\contentsline {section}{Stage 4: Language Modeling Head}{40}{section*.83}\protected@file@percent }
+\newlabel{stage-4-language-modeling-head}{{9}{40}{Stage 4: Language Modeling Head}{section*.83}{}}
+\@writefile{toc}{\contentsline {section}{Stage 5: Forward Pass vs. Training Updates (The Distinction)}{40}{section*.84}\protected@file@percent }
+\newlabel{stage-5-forward-pass-vs-training-updates-the-distinction}{{9}{40}{Stage 5: Forward Pass vs. Training Updates (The Distinction)}{section*.84}{}}
+\gdef \LT@xx {\LT@entry 
+    {1}{62.37035pt}\LT@entry 
+    {1}{222.8745pt}\LT@entry 
+    {1}{175.11769pt}}
+\@writefile{toc}{\contentsline {section}{Project-Specific Training and Target Data Preparation Strategy}{41}{section*.85}\protected@file@percent }
+\newlabel{project-specific-training-and-target-data-preparation-strategy}{{9}{41}{Project-Specific Training and Target Data Preparation Strategy}{section*.85}{}}
+\@writefile{toc}{\contentsline {subsection}{1. The data}{41}{section*.86}\protected@file@percent }
+\newlabel{1-the-data}{{9}{41}{1. The data}{section*.86}{}}
+\@writefile{toc}{\contentsline {subsection}{2. Three kinds of "masking", and which ones we use}{41}{section*.87}\protected@file@percent }
+\newlabel{2-three-kinds-of-masking-and-which-ones-we-use}{{9}{41}{2. Three kinds of "masking", and which ones we use}{section*.87}{}}
+\@writefile{toc}{\contentsline {subsection}{3. Step A --- Build one sequence per sample}{42}{section*.88}\protected@file@percent }
+\newlabel{3-step-a--build-one-sequence-per-sample}{{9}{42}{3. Step A --- Build one sequence per sample}{section*.88}{}}
+\@writefile{toc}{\contentsline {subsection}{4. Step B --- The attention mask: who may look at whom}{42}{section*.89}\protected@file@percent }
+\newlabel{4-step-b--the-attention-mask-who-may-look-at-whom}{{9}{42}{4. Step B --- The attention mask: who may look at whom}{section*.89}{}}
+\@writefile{toc}{\contentsline {subsection}{5. Step C --- Targets and the loss mask}{42}{section*.90}\protected@file@percent }
+\newlabel{5-step-c--targets-and-the-loss-mask}{{9}{42}{5. Step C --- Targets and the loss mask}{section*.90}{}}
+\gdef \LT@xxi {\LT@entry 
+    {3}{140.71324pt}\LT@entry 
+    {3}{110.72679pt}\LT@entry 
+    {3}{97.91035pt}}
+\@writefile{toc}{\contentsline {subsection}{6. Worked example: a real batch with \(B = 2\)}{43}{section*.91}\protected@file@percent }
+\newlabel{6-worked-example-a-real-batch-with-b--2}{{9}{43}{\texorpdfstring {6. Worked example: a real batch with \(B = 2\)}{6. Worked example: a real batch with B = 2}}{section*.91}{}}
+\@writefile{toc}{\contentsline {subsection}{7. Inference uses the same layout}{43}{section*.92}\protected@file@percent }
+\newlabel{7-inference-uses-the-same-layout}{{9}{43}{7. Inference uses the same layout}{section*.92}{}}
+\@writefile{toc}{\contentsline {section}{One Training Step in This Project}{43}{section*.93}\protected@file@percent }
+\newlabel{one-training-step-in-this-project}{{9}{43}{One Training Step in This Project}{section*.93}{}}
+\gdef \LT@xxii {\LT@entry 
+    {3}{188.77644pt}\LT@entry 
+    {3}{116.89687pt}}
+\@writefile{toc}{\contentsline {section}{Total Parameter Count}{44}{section*.94}\protected@file@percent }
+\newlabel{total-parameter-count}{{9}{44}{Total Parameter Count}{section*.94}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {10}Backpropagation: How Every Weight and Bias Gets Updated}{45}{chapter.10}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{backpropagation-how-every-weight-and-bias-gets-updated}{{10}{45}{Backpropagation: How Every Weight and Bias Gets Updated}{chapter.10}{}}
+\@writefile{toc}{\contentsline {section}{0. The Big Picture}{45}{section*.95}\protected@file@percent }
+\newlabel{0-the-big-picture}{{10}{45}{0. The Big Picture}{section*.95}{}}
+\@writefile{toc}{\contentsline {subsection}{Notation}{45}{section*.96}\protected@file@percent }
+\newlabel{notation}{{10}{45}{Notation}{section*.96}{}}
+\gdef \LT@xxiii {\LT@entry 
+    {1}{60.01202pt}\LT@entry 
+    {1}{100.35701pt}\LT@entry 
+    {1}{105.26433pt}\LT@entry 
+    {1}{95.44968pt}\LT@entry 
+    {1}{99.26433pt}}
+\@writefile{toc}{\contentsline {subsection}{Forward saves, backward uses}{46}{section*.97}\protected@file@percent }
+\newlabel{forward-saves-backward-uses}{{10}{46}{Forward saves, backward uses}{section*.97}{}}
+\@writefile{toc}{\contentsline {subsection}{The order}{46}{section*.98}\protected@file@percent }
+\newlabel{the-order}{{10}{46}{The order}{section*.98}{}}
+\@writefile{toc}{\contentsline {subsection}{Every learnable parameter in the encoder}{46}{section*.99}\protected@file@percent }
+\newlabel{every-learnable-parameter-in-the-encoder}{{10}{46}{Every learnable parameter in the encoder}{section*.99}{}}
+\@writefile{toc}{\contentsline {section}{1. Three Rules That Cover Everything}{46}{section*.100}\protected@file@percent }
+\newlabel{1-three-rules-that-cover-everything}{{10}{46}{1. Three Rules That Cover Everything}{section*.100}{}}
+\@writefile{toc}{\contentsline {subsection}{Rule 1 --- The chain rule}{46}{section*.101}\protected@file@percent }
+\newlabel{rule-1--the-chain-rule}{{10}{46}{Rule 1 --- The chain rule}{section*.101}{}}
+\@writefile{toc}{\contentsline {subsection}{Rule 2 --- The linear layer (used 9 times per block + the LM head)}{46}{section*.102}\protected@file@percent }
+\newlabel{rule-2--the-linear-layer-used-9-times-per-block--the-lm-head}{{10}{46}{Rule 2 --- The linear layer (used 9 times per block + the LM head)}{section*.102}{}}
+\@writefile{toc}{\contentsline {subsection}{Rule 3 --- Addition copies, re-use adds up}{47}{section*.103}\protected@file@percent }
+\newlabel{rule-3--addition-copies-re-use-adds-up}{{10}{47}{Rule 3 --- Addition copies, re-use adds up}{section*.103}{}}
+\@writefile{toc}{\contentsline {section}{2. Step 1 --- Loss and Softmax: \(d\mathbf {Z}\)}{47}{section*.104}\protected@file@percent }
+\newlabel{2-step-1--loss-and-softmax-dmathbfz}{{10}{47}{\texorpdfstring {2. Step 1 --- Loss and Softmax: \(d\mathbf {Z}\)}{2. Step 1 --- Loss and Softmax: d\textbackslash mathbf\{Z\}}}{section*.104}{}}
+\gdef \LT@xxiv {\LT@entry 
+    {3}{48.81998pt}\LT@entry 
+    {3}{48.39844pt}\LT@entry 
+    {1}{62.50879pt}\LT@entry 
+    {3}{163.31169pt}}
+\@writefile{toc}{\contentsline {section}{3. Step 2 --- LM Head: \(W_{LM}\), \(b_{LM}\)}{48}{section*.105}\protected@file@percent }
+\newlabel{3-step-2--lm-head-w_lm-b_lm}{{10}{48}{\texorpdfstring {3. Step 2 --- LM Head: \(W_{LM}\), \(b_{LM}\)}{3. Step 2 --- LM Head: W\_\{LM\}, b\_\{LM\}}}{section*.105}{}}
+\@writefile{toc}{\contentsline {section}{4. Step 3 --- Second Add \& Norm: \(\mitgamma _2\), \(\mitbeta _2\)}{48}{section*.106}\protected@file@percent }
+\newlabel{4-step-3--second-add--norm-gamma_2-beta_2}{{10}{48}{\texorpdfstring {4. Step 3 --- Second Add \& Norm: \(\gamma _2\), \(\beta _2\)}{4. Step 3 --- Second Add \& Norm: \textbackslash gamma\_2, \textbackslash beta\_2}}{section*.106}{}}
+\@writefile{toc}{\contentsline {subsection}{LayerNorm backward}{48}{section*.107}\protected@file@percent }
+\newlabel{layernorm-backward}{{10}{48}{LayerNorm backward}{section*.107}{}}
+\gdef \LT@xxv {\LT@entry 
+    {1}{123.2812pt}\LT@entry 
+    {1}{218.42052pt}\LT@entry 
+    {1}{118.6142pt}}
+\@writefile{toc}{\contentsline {subsection}{The addition}{49}{section*.108}\protected@file@percent }
+\newlabel{the-addition}{{10}{49}{The addition}{section*.108}{}}
+\@writefile{toc}{\contentsline {section}{5. Step 4 --- Feed-Forward Network: \(W_2\), \(b_2\), \(W_1\), \(b_1\)}{49}{section*.109}\protected@file@percent }
+\newlabel{5-step-4--feed-forward-network-w_2-b_2-w_1-b_1}{{10}{49}{\texorpdfstring {5. Step 4 --- Feed-Forward Network: \(W_2\), \(b_2\), \(W_1\), \(b_1\)}{5. Step 4 --- Feed-Forward Network: W\_2, b\_2, W\_1, b\_1}}{section*.109}{}}
+\gdef \LT@xxvi {\LT@entry 
+    {1}{53.60735pt}\LT@entry 
+    {1}{115.91647pt}\LT@entry 
+    {1}{206.84503pt}\LT@entry 
+    {1}{83.94707pt}}
+\@writefile{toc}{\contentsline {section}{6. Step 5 --- First Add \& Norm: \(\mitgamma _1\), \(\mitbeta _1\)}{50}{section*.110}\protected@file@percent }
+\newlabel{6-step-5--first-add--norm-gamma_1-beta_1}{{10}{50}{\texorpdfstring {6. Step 5 --- First Add \& Norm: \(\gamma _1\), \(\beta _1\)}{6. Step 5 --- First Add \& Norm: \textbackslash gamma\_1, \textbackslash beta\_1}}{section*.110}{}}
+\@writefile{toc}{\contentsline {section}{7. Step 6 --- Multi-Head Attention: \(W_O\), \(W_Q\), \(W_K\), \(W_V\)}{50}{section*.111}\protected@file@percent }
+\newlabel{7-step-6--multi-head-attention-w_o-w_q-w_k-w_v}{{10}{50}{\texorpdfstring {7. Step 6 --- Multi-Head Attention: \(W_O\), \(W_Q\), \(W_K\), \(W_V\)}{7. Step 6 --- Multi-Head Attention: W\_O, W\_Q, W\_K, W\_V}}{section*.111}{}}
+\@writefile{toc}{\contentsline {section}{8. Step 7 --- Through the Stack of Blocks}{51}{section*.112}\protected@file@percent }
+\newlabel{8-step-7--through-the-stack-of-blocks}{{10}{51}{8. Step 7 --- Through the Stack of Blocks}{section*.112}{}}
+\gdef \LT@xxvii {\LT@entry 
+    {1}{48.0568pt}\LT@entry 
+    {1}{24.44943pt}\LT@entry 
+    {3}{98.85645pt}}
+\@writefile{toc}{\contentsline {section}{9. Step 8 --- Positional Encoding and Input Embedding: \(E\)}{52}{section*.113}\protected@file@percent }
+\newlabel{9-step-8--positional-encoding-and-input-embedding-e}{{10}{52}{\texorpdfstring {9. Step 8 --- Positional Encoding and Input Embedding: \(E\)}{9. Step 8 --- Positional Encoding and Input Embedding: E}}{section*.113}{}}
+\@writefile{toc}{\contentsline {section}{10. Updating the Parameters}{52}{section*.114}\protected@file@percent }
+\newlabel{10-updating-the-parameters}{{10}{52}{10. Updating the Parameters}{section*.114}{}}
+\@writefile{toc}{\contentsline {subsection}{Plain gradient descent (the idea)}{52}{section*.115}\protected@file@percent }
+\newlabel{plain-gradient-descent-the-idea}{{10}{52}{Plain gradient descent (the idea)}{section*.115}{}}
+\gdef \LT@xxviii {\LT@entry 
+    {1}{57.7423pt}\LT@entry 
+    {1}{63.7423pt}\LT@entry 
+    {1}{40.22253pt}\LT@entry 
+    {1}{59.03949pt}\LT@entry 
+    {1}{49.63388pt}\LT@entry 
+    {1}{49.63388pt}\LT@entry 
+    {1}{96.67337pt}\LT@entry 
+    {1}{43.63388pt}}
+\@writefile{toc}{\contentsline {subsection}{Adam (what this project uses)}{53}{section*.116}\protected@file@percent }
+\newlabel{adam-what-this-project-uses}{{10}{53}{Adam (what this project uses)}{section*.116}{}}
+\@writefile{toc}{\contentsline {subsection}{Gradient clipping (safety belt)}{53}{section*.117}\protected@file@percent }
+\newlabel{gradient-clipping-safety-belt}{{10}{53}{Gradient clipping (safety belt)}{section*.117}{}}
+\@writefile{toc}{\contentsline {section}{11. Summary: Every Gradient in One Table}{53}{section*.118}\protected@file@percent }
+\newlabel{11-summary-every-gradient-in-one-table}{{10}{53}{11. Summary: Every Gradient in One Table}{section*.118}{}}
+\gdef \LT@xxix {\LT@entry 
+    {1}{100.85823pt}\LT@entry 
+    {1}{201.70981pt}\LT@entry 
+    {1}{157.74788pt}}
+\@writefile{toc}{\contentsline {section}{12. How We Know the Formulas Are Right: Gradient Checking}{54}{section*.119}\protected@file@percent }
+\newlabel{12-how-we-know-the-formulas-are-right-gradient-checking}{{10}{54}{12. How We Know the Formulas Are Right: Gradient Checking}{section*.119}{}}
+\gdef \@abspage@last{55}

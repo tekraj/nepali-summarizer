@@ -39,7 +39,7 @@ Token IDs (B, T) + attention mask (B, T)
                               [ Softmax ] → Token Probabilities (B, T, V)
 ```
 
-### Shapes at Every Stage (this project: $B = 4$, $T = 512$, $d_{model} = 512$, $h = 8$, $d_k = 64$, $d_{ff} = 2048$, $V = 6302$)
+### Shapes at Every Stage (this project: $B = 4$, $T = 512$, $d_{model} = 512$, $h = 8$, $d_k = 64$, $d_{ff} = 2048$, $V = 30000$)
 
 | Stage | Tensor | Shape | Example |
 | --- | --- | --- | --- |
@@ -53,7 +53,7 @@ Token IDs (B, T) + attention mask (B, T)
 | FFN | hidden | $(B, T, d_{ff})$ | $(4, 512, 2048)$ |
 | Block output | $\mathbf{X}_{out}$ | $(B, T, d_{model})$ | $(4, 512, 512)$ |
 | Encoder output | $\mathbf{X}_N$ | $(B, T, d_{model})$ | $(4, 512, 512)$ |
-| LM head | logits / probabilities | $(B, T, V)$ | $(4, 512, 6302)$ |
+| LM head | logits / probabilities | $(B, T, V)$ | $(4, 512, 30000)$ |
 
 ---
 
@@ -61,7 +61,7 @@ Token IDs (B, T) + attention mask (B, T)
 
 ### 1. Vocabulary Lookup
 
-Given a batch of tokenized, padded sentences of shape $(B, T)$, each token ID is looked up in the **Input Embedding Matrix** $E \in \mathbb{R}^{V \times d_{model}}$ (here $V = 6302$, $d_{model} = 512$).
+Given a batch of tokenized, padded sentences of shape $(B, T)$, each token ID is looked up in the **Input Embedding Matrix** $E \in \mathbb{R}^{V \times d_{model}}$ (here $V = 30000$, $d_{model} = 512$).
 
 * **Scaling:** The retrieved vectors are multiplied by $\sqrt{d_{model}} \approx 22.63$ so that the embeddings are not dominated by the positional encodings.
 * **Output Shape:** $(B, T, d_{model})$
@@ -177,15 +177,109 @@ $$P(w_i) = \frac{e^{z_i}}{\sum_{j=1}^{V} e^{z_j}}$$
 
 ---
 
+## Project-Specific Training and Target Data Preparation Strategy
+
+This project trains the encoder as a **summarizer**, not as a BERT-style masked language model. There is no decoder, so one encoder stack reads the article *and* writes the summary. This setup is called a **prefix-LM** (prefix language model).
+
+> **Code:** `src/data_preprocessing/batching.py` → `CreateTrainingBatch.create_input_tensor` and `build_attention_mask`
+
+### 1. The data
+
+* **Articles:** about 132,000 pure-Devanagari Nepali news articles, `data/cleaned/{name}.txt`.
+* **Targets:** one summary per article, `data/summary/{name}-summary.txt`. The batcher pairs files by `{name}` and skips a summary whose article is missing.
+* **One sample = one (article, summary) pair.** Pairs are streamed from disk one at a time, so RAM use stays flat however big the corpus is.
+
+### 2. Three kinds of "masking", and which ones we use
+
+| Kind | What it does | Used here? |
+| --- | --- | --- |
+| **Token masking (MLM)** | Replace ~15% of input tokens with `<mask>` and predict them (Section 2 of `7-linearization-and-softmax.md`) | ❌ Only in the old pre-training setup. **No token is ever replaced with `<mask>` here.** |
+| **Attention masking** | Hide some positions from others inside attention (score → $-10^9$) | ✅ the prefix-LM mask, $(B, T, T)$ |
+| **Loss masking** | Compute the loss only at some positions | ✅ loss only on the summary, $(B, T)$ |
+
+When papers or tutorials say "the input should be masked" for summarization, they mean **loss masking**: the model reads the whole article, but is never graded on reproducing it.
+
+### 3. Step A — Build one sequence per sample
+
+The article and summary are tokenized separately, each with its own budget, then joined:
+
+$$\underbrace{\texttt{<s>}\ \ \text{article}[{:}766]\ \ \texttt{</s>}}_{\text{prefix: at most } 768 \text{ tokens}}\ \ \underbrace{\text{summary}[{:}255]\ \ \texttt{</s>}}_{\text{target: at most } 256 \text{ tokens}}\ \ \texttt{<pad>} \dots$$
+
+* **Budgets, not a fixed split.** 768 + 256 = 1024 is the *maximum* length (75% / 25%). A short article is **not** padded up to 768. The summary starts right after the article's real `</s>`, and `<pad>` is only added **at the end** of the row, up to the longest sample in the batch.
+* **Truncation keeps the start.** An article longer than 766 tokens loses its right side. News articles put the key facts first, so this keeps the most useful part. The same rule cuts summaries at 255 tokens.
+* **How often it happens (2,000 real pairs):** the median article is 1,125 tokens and 66% of articles are truncated. The median summary is 162 tokens and about 6% are truncated.
+* **The input row contains the real summary.** This is *teacher forcing*: the true summary tokens go into the model as input, and the attention mask (Step B) stops any position from seeing a token it has to predict.
+
+### 4. Step B — The attention mask: who may look at whom
+
+`build_attention_mask` builds a $(B, T, T)$ boolean mask (query × key). A key is visible to a query when it is a real token **and** either it belongs to the prefix **or** it is not after the query:
+
+$$\text{visible}(q, k) = \big(k < \text{prefix\_len} \ \lor\ k \le q\big) \ \land\ k < \text{len}$$
+
+Toy example: article `a1 a2 a3` and summary `s1 s2` (prefix length 5, real length 8, then one `<pad>`):
+
+```text
+              keys →  <s> a1  a2  a3 </s>  s1  s2 </s> <pad>
+query <s>              ✓   ✓   ✓   ✓   ✓    ·   ·   ·    ·
+      a1               ✓   ✓   ✓   ✓   ✓    ·   ·   ·    ·     article rows: the whole article,
+      a2               ✓   ✓   ✓   ✓   ✓    ·   ·   ·    ·     in both directions (like an encoder);
+      a3               ✓   ✓   ✓   ✓   ✓    ·   ·   ·    ·     never the summary
+      </s>             ✓   ✓   ✓   ✓   ✓    ·   ·   ·    ·
+      s1               ✓   ✓   ✓   ✓   ✓    ✓   ·   ·    ·     summary rows: the whole article +
+      s2               ✓   ✓   ✓   ✓   ✓    ✓   ✓   ·    ·     earlier summary tokens only
+      </s>             ✓   ✓   ✓   ✓   ✓    ✓   ✓   ✓    ·     (causal, like a decoder)
+```
+
+Compared with an encoder–decoder Transformer, the top-left block does the encoder's job, the bottom-left block does cross-attention's job, and the bottom-right triangle is the decoder's causal mask. `<pad>` keys are hidden from everyone.
+
+### 5. Step C — Targets and the loss mask
+
+Position $p$ is trained to predict the token at $p + 1$. The loss mask keeps only the positions whose next token is a summary token, from the prefix's closing `</s>` to the last summary token:
+
+$$\text{loss\_mask}[p] = \big(p \ge \text{prefix\_len} - 1\big) \ \land\ \big(p < \text{len} - 1\big)$$
+
+```text
+position:    0    1    2    3    4     5    6    7     8
+input:      <s>   a1   a2   a3  </s>   s1   s2  </s>  <pad>
+next token:  a1   a2   a3  </s>  s1    s2  </s> <pad>   –
+loss?        ✗    ✗    ✗    ✗    ✓     ✓    ✓    ✗     ✗
+```
+
+* **The article positions get no loss.** This is the "input is masked" part.
+* **`targets` has shape $(N)$.** The code gathers only the next tokens at the $N$ loss positions (here `[s1, s2, </s>]`), instead of keeping a $(B, T)$ label row filled with "ignore" values.
+* **The final `</s>` is a target.** The model learns when to stop, which is how inference knows the summary is finished.
+* The LM head runs only on those $N$ positions: $(N, 512) \rightarrow (N, V)$. The gradient is scattered back into $(B, T, 512)$ in backward (`9-backpropagation.md`, Step 2).
+
+> **Common misconception:** "the input holds 768 article tokens and then a mask, and the target holds 768 masked positions and then 255 summary tokens." That is only true when the article is exactly 766 tokens long. In general, the input holds the **real** article (whatever its length, up to 766) followed by the **real** summary, with nothing masked out. The article/summary boundary sits at `prefix_len`, which is different for every sample. Masking happens in the attention mask and the loss mask, never in the token IDs.
+
+### 6. Worked example: a real batch with $B = 2$
+
+| | `100001.txt` | `100089.txt` |
+| --- | --- | --- |
+| Article tokens | 2,046 → cut to 766 | 427 (fits) |
+| Prefix `<s> article </s>` | 768 | 429 |
+| Summary tokens (+ `</s>`) | 213 + 1 = 214 | 123 + 1 = 124 |
+| Real length | 982 | 553 |
+| `<pad>` added | 0 | 429 |
+| Loss positions | 767 … 980 → 214 | 428 … 551 → 124 |
+
+The batch has $T = 982$ (the longest row, not 1024), so `token_ids` is $(2, 982)$, the attention mask is $(2, 982, 982)$ and the loss mask is $(2, 982)$. It has $N = 214 + 124 = 338$ loss positions, so `targets` is $(338)$ and the LM head produces $(338, V)$ probabilities.
+
+### 7. Inference uses the same layout
+
+`src/inference/greedy_decoder.py` → `greedy_summarize` starts from `<s> article[:766] </s>` with no summary. It builds the same prefix-LM mask, runs the LM head on the last position only, appends the argmax token, and repeats until `</s>` or 256 summary tokens. The model sees exactly the pattern it was trained on, except that the summary tokens are its own predictions instead of the ground truth.
+
+---
+
 ## One Training Step in This Project
 
 ```text
-1. batcher.create_input_tensor()      → token IDs (B, T), mask (B, T)
-2. batcher.create_mlm_inputs()        → replace ~15% of real tokens with <mask>
-3. model.forward(...)                 → probabilities at the N masked positions (N, V)
-4. cross_entropy_loss(...)            → loss (a number) and d_logits (N, V)
-5. model.backward(d_logits)           → a gradient for every weight and bias
-6. optimizer.step(params, grads)      → Adam updates every weight in place
+1. batcher.create_input_tensor()      → token IDs (B, T), attention mask (B, T, T),
+                                        loss mask (B, T), targets (N)
+2. model.forward(..., output_mask)    → probabilities at the N summary positions (N, V)
+3. cross_entropy_loss(...)            → loss (a number) and d_logits (N, V)
+4. model.backward(d_logits)           → a gradient for every weight and bias
+5. optimizer.step(params, grads)      → Adam updates every weight in place
 ```
 
 (`src/training/train.py` → `train_step`. Start training with `python -m scripts.train_model`.)
@@ -194,8 +288,8 @@ $$P(w_i) = \frac{e^{z_i}}{\sum_{j=1}^{V} e^{z_j}}$$
 
 | Component | Count |
 | --- | --- |
-| Input embedding $E$ ($6302 \times 512$) | 3,226,624 |
+| Input embedding $E$ ($30000 \times 512$) | 15,360,000 |
 | 6 encoder blocks × 3,150,336 | 18,902,016 |
-| LM head ($W_{LM}$ + $b_{LM}$) | 3,232,926 |
+| LM head ($W_{LM}$ + $b_{LM}$) | 15,390,000 |
 | Positional encoding | 0 (fixed, not learned) |
-| **Total** | **25,361,566** |
+| **Total** | **49,652,016** |
