@@ -7,6 +7,7 @@ import math
 
 import cupy as cp
 
+from .functional import to_compute
 from src.tensor_types import FloatArray, IntArray
 
 
@@ -43,11 +44,11 @@ class InputEmbedding:
             token_ids: [B, T] int64, every value in [0, V-1].
 
         Returns:
-            [B, T, D] float32 scaled embeddings, e.g. [4, 512, 512].
+            [B, T, D] scaled embeddings in the compute dtype (float16), e.g. [4, 512, 512].
         """
         self._token_ids = token_ids
         # E[token_ids] picks one row per token: [B, T] -> [B, T, D]
-        return self.embedding_matrix[token_ids] * self.scale
+        return to_compute(self.embedding_matrix[token_ids] * self.scale)
 
     def backward(self, d_out: FloatArray) -> None:
         """Step 3 — route the gradient back to the rows of ``E`` that were looked up.
@@ -57,7 +58,7 @@ class InputEmbedding:
         """
         d_embedding = cp.zeros_like(self.embedding_matrix)  # [V, D]
         # add.at accumulates when the same token appears several times in the batch.
-        cp.add.at(d_embedding, self._token_ids, d_out * self.scale)
+        cp.add.at(d_embedding, self._token_ids, d_out.astype(cp.float32) * self.scale)
         self.grads = {"embedding_matrix": d_embedding}
 
     def parameters(self) -> dict[str, FloatArray]:

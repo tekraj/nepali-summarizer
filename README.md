@@ -1,6 +1,6 @@
 # Building a Nepali Summarization Transformer from Scratch (CuPy)
 
-Every layer, its backward pass, the loss and the Adam optimizer are hand-written with [CuPy](https://cupy.dev/), the NumPy-compatible array library that runs on NVIDIA GPUs. There is no PyTorch and no autograd. All weights, activations and gradients are `float32` (fp32).
+Every layer, its backward pass, the loss and the Adam optimizer are hand-written with [CuPy](https://cupy.dev/), the NumPy-compatible array library that runs on NVIDIA GPUs. There is no PyTorch and no autograd. Training uses fp16 mixed precision: `float16` activations and matmuls (GPU tensor cores), with `float32` master weights, gradients and Adam state, and dynamic loss scaling.
 
 ## 1. Data Preparation & Tokenization
 

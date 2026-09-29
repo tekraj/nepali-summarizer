@@ -7,13 +7,17 @@ project:
 
 training:
   # B. Every block caches its activations for backprop; the attention weights alone are
-  # B x 8 x 512 x 512 floats per block, so B=16 needs several GB of RAM. Raise if you have it.
-  batch_size: 4
-  epochs: 10
+  # B x 8 x T x T floats per block (fp16: 2 bytes each). B=16 at T=1024 fits a 16 GB T4;
+  # use --batch-size 4 on a 6 GB GPU.
+  batch_size: 16
+  epochs: 100
   learning_rate: 0.0001
   max_grad_norm: 1.0
   seed: 42
   checkpoint_dir: checkpoints
+  # fp16 = mixed precision: float16 activations and matmuls (tensor cores), float32 master
+  # weights and Adam state, dynamic loss scaling. fp32 = everything float32 (slower).
+  precision: fp16
 
 data:
   # One training sample = <s> article </s> summary </s>, so T <= 768 + 256 = 1024.

@@ -11,6 +11,7 @@ from src.config import DEFAULT_CONFIG_PATH, ProjectConfig
 from src.data_preprocessing.batching import CreateTrainingBatch
 from src.inference.greedy_decoder import greedy_summarize
 from src.models.encoder import TransformerEncoder
+from src.models.encoder_layers.functional import set_compute_dtype
 from src.training.train import load_checkpoint
 
 
@@ -28,6 +29,7 @@ def main() -> None:
     """Entry point for inference."""
     args = parse_args()
     config = ProjectConfig.from_yaml(args.config)
+    set_compute_dtype(config.compute_dtype)
 
     vocab_dir = config.resolve(config.vocab_dir)
     batcher = CreateTrainingBatch(

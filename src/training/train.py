@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from pathlib import Path
 
 import cupy as cp
@@ -24,6 +25,10 @@ def train_step(
 ) -> tuple[float, float]:
     """One full training step on a batch. Returns (loss, grad_norm).
 
+    The loss gradient is multiplied by ``optimizer.loss_scale`` before backward so small fp16
+    gradients survive; ``optimizer.step`` divides it back out, or skips the update (grad_norm is
+    then inf / NaN) if a gradient overflowed.
+
     Args:
         token_ids:      [B, T] ``<s> article </s> summary </s>`` token IDs.
         attention_mask: [B, T, T] bool prefix-LM mask.
@@ -33,6 +38,7 @@ def train_step(
     # Only the summary positions reach the LM head, so the loss covers the summary alone.
     _, probabilities = model.forward(token_ids, attention_mask, output_mask=loss_mask)  # [N, V]
     loss, d_logits = cross_entropy_loss(probabilities, targets)
+    d_logits *= optimizer.loss_scale
     model.backward(d_logits)
     grad_norm = optimizer.step(model.parameters(), model.gradients())
     return loss, grad_norm
@@ -75,11 +81,15 @@ def train_epoch(
     loss = float("nan")
     while (batch := batcher.create_input_tensor()) is not None:
         loss, grad_norm = train_step(model, optimizer, *batch)
-        total_loss += loss
-        steps += 1
+        if math.isfinite(loss):  # an fp16 overflow step (skipped by Adam) stays out of the average
+            total_loss += loss
+            steps += 1
         step += 1
         progress.update()
-        progress.set_postfix(loss=f"{loss:.4f}", avg=f"{total_loss / steps:.4f}", grad=f"{grad_norm:.2f}", T=batch[0].shape[1])
+        progress.set_postfix(
+            loss=f"{loss:.4f}", avg=f"{total_loss / max(steps, 1):.4f}", grad=f"{grad_norm:.2f}",
+            scale=f"{optimizer.loss_scale:g}", T=batch[0].shape[1],
+        )
         if save_every and partial_checkpoint_stem and step % save_every == 0:
             path = Path(f"{partial_checkpoint_stem}_step_{step}.npz")
             training_state = {

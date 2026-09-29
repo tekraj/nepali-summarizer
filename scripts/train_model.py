@@ -22,6 +22,7 @@ import cupy as cp
 from src.config import DEFAULT_CONFIG_PATH, ProjectConfig
 from src.data_preprocessing.batching import CreateTrainingBatch
 from src.models.encoder import TransformerEncoder
+from src.models.encoder_layers.functional import set_compute_dtype
 from src.training.optimizer import Adam
 from src.training.train import load_checkpoint, save_checkpoint, train_epoch
 
@@ -60,6 +61,7 @@ def main() -> None:
     if args.batch_size is not None:
         config.batch_size = args.batch_size
     cp.random.seed(config.seed)
+    set_compute_dtype(config.compute_dtype)
 
     # 1. Data: stream (article, summary) pairs -> token IDs [B, T] + prefix-LM mask [B, T, T] + loss mask [B, T]
     vocab_dir = config.resolve(config.vocab_dir)
@@ -93,7 +95,7 @@ def main() -> None:
     print(
         f"Encoder: V={batcher.vocab_size} D={config.d_model} H={config.num_heads} "
         f"N={config.num_layers} D_ff={config.d_ff} T<={config.max_article_length}+{config.max_summary_length} "
-        f"B={config.batch_size} | {num_params / 1e6:.1f}M parameters"
+        f"B={config.batch_size} {config.precision} | {num_params / 1e6:.1f}M parameters"
     )
 
     # Where to start: explicit flags win; otherwise continue from the checkpoint's training state.
@@ -106,10 +108,16 @@ def main() -> None:
             loss_sum, loss_steps = training_state["loss_sum"], training_state["loss_steps"]
             saved_batch_size = training_state.get("batch_size", config.batch_size)
             if args.skip_steps is None and saved_batch_size != config.batch_size:
-                raise SystemExit(
-                    f"checkpoint was saved with batch_size={saved_batch_size}, now {config.batch_size}; "
-                    "skipping by batch count would land on different data. Use the same --batch-size."
-                )
+                # The data order is fixed, so skip the same number of samples in bigger/smaller batches.
+                samples_done = skip_steps * saved_batch_size
+                if samples_done % config.batch_size:
+                    raise SystemExit(
+                        f"checkpoint was saved with batch_size={saved_batch_size} after {samples_done} samples, "
+                        f"which is not a whole number of batches of {config.batch_size}. Use --batch-size "
+                        f"{saved_batch_size} to finish this epoch, then change it."
+                    )
+                skip_steps = samples_done // config.batch_size
+                print(f"batch_size {saved_batch_size} -> {config.batch_size}: skipping {skip_steps} batches")
         print(
             f"Resuming: epoch {start_epoch}, after batch {skip_steps}, Adam step {optimizer.step_count}"
             + (f", running loss {loss_sum / loss_steps:.4f}" if loss_steps else "")

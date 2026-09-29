@@ -49,15 +49,17 @@ class LayerNormalization:
             x: [B, T, D].
 
         Returns:
-            [B, T, D], each token vector has ~zero mean and unit variance before γ/β.
+            [B, T, D] in x's dtype, each token vector has ~zero mean and unit variance before γ/β.
         """
+        dtype = x.dtype
+        x = x.astype(cp.float32, copy=False)  # the statistics need float32: a float16 x² overflows above 256
         mu = cp.mean(x, axis=-1, keepdims=True)  # [B, T, 1]
         var = cp.var(x, axis=-1, keepdims=True)  # [B, T, 1]
         inv_std = 1.0 / cp.sqrt(var + self.eps)  # [B, T, 1]
         x_hat = (x - mu) * inv_std  # [B, T, D]
 
-        self.cache = {"x_hat": x_hat, "inv_std": inv_std}
-        return self.gamma * x_hat + self.beta
+        self.cache = {"x_hat": x_hat.astype(dtype, copy=False), "inv_std": inv_std}
+        return (self.gamma * x_hat + self.beta).astype(dtype, copy=False)
 
     def backward(self, d_out: FloatArray) -> FloatArray:
         """
@@ -65,19 +67,21 @@ class LayerNormalization:
             d_out: [B, T, D] gradient of the normalised output.
 
         Returns:
-            [B, T, D] gradient of the input x.
+            [B, T, D] gradient of the input x, in d_out's dtype.
         """
-        x_hat, inv_std = self.cache["x_hat"], self.cache["inv_std"]
+        dtype = d_out.dtype
+        d_out = d_out.astype(cp.float32, copy=False)
+        x_hat, inv_std = self.cache["x_hat"].astype(cp.float32, copy=False), self.cache["inv_std"]
         self.grads["gamma"] = cp.sum(d_out * x_hat, axis=(0, 1))  # [D]
         self.grads["beta"] = cp.sum(d_out, axis=(0, 1))  # [D]
 
         d_x_hat = d_out * self.gamma  # [B, T, D]
         # Standard LayerNorm input gradient (μ and σ² both depend on every feature of x).
-        return inv_std * (
+        return (inv_std * (
             d_x_hat
             - cp.mean(d_x_hat, axis=-1, keepdims=True)
             - x_hat * cp.mean(d_x_hat * x_hat, axis=-1, keepdims=True)
-        )
+        )).astype(dtype, copy=False)
 
     def parameters(self) -> dict[str, FloatArray]:
         return {"gamma": self.gamma, "beta": self.beta}

@@ -5,7 +5,7 @@
 
 import cupy as cp
 
-from .functional import matmul_weight_grad
+from .functional import matmul, matmul_weight_grad, to_compute
 from src.tensor_types import FloatArray
 
 
@@ -46,12 +46,14 @@ class PositionwiseFeedForward:
         Returns:
             [B, T, D] transformed tensor, routed into the second Add & Norm.
         """
-        hidden = x @ self.W1 + self.b1  # Step 1: expand   [B, T, 512] -> [B, T, 2048]
+        # float32 master weights -> compute dtype (float16) copies, kept for backward.
+        W1, W2 = to_compute(self.W1), to_compute(self.W2)
+        hidden = matmul(x, W1) + to_compute(self.b1)  # Step 1: expand   [B, T, 512] -> [B, T, 2048]
         activated = self.relu(hidden)  # Step 2: gate     [B, T, 2048]
-        output = activated @ self.W2 + self.b2  # Step 3: compress [B, T, 2048] -> [B, T, 512]
+        output = matmul(activated, W2) + to_compute(self.b2)  # Step 3: compress [B, T, 2048] -> [B, T, 512]
 
         # `activated > 0` equals `hidden > 0`, so caching `activated` alone is enough for backward.
-        self.cache = {"x": x, "activated": activated}
+        self.cache = {"x": x, "activated": activated, "W1": W1, "W2": W2}
         return output
 
     def backward(self, d_out: FloatArray) -> FloatArray:
@@ -65,12 +67,12 @@ class PositionwiseFeedForward:
         x, activated = self.cache["x"], self.cache["activated"]
 
         self.grads["W2"] = matmul_weight_grad(activated, d_out)  # [2048, 512]
-        self.grads["b2"] = d_out.sum(axis=(0, 1))  # [512]
-        d_hidden = (d_out @ self.W2.T) * (activated > 0)  # ReLU'(h) = 1 if h > 0 else 0
+        self.grads["b2"] = d_out.sum(axis=(0, 1), dtype=cp.float32)  # [512]
+        d_hidden = matmul(d_out, self.cache["W2"].T) * (activated > 0)  # ReLU'(h) = 1 if h > 0 else 0
 
         self.grads["W1"] = matmul_weight_grad(x, d_hidden)  # [512, 2048]
-        self.grads["b1"] = d_hidden.sum(axis=(0, 1))  # [2048]
-        return d_hidden @ self.W1.T  # [B, T, 512]
+        self.grads["b1"] = d_hidden.sum(axis=(0, 1), dtype=cp.float32)  # [2048]
+        return matmul(d_hidden, self.cache["W1"].T)  # [B, T, 512]
 
     def parameters(self) -> dict[str, FloatArray]:
         return {"W1": self.W1, "b1": self.b1, "W2": self.W2, "b2": self.b2}

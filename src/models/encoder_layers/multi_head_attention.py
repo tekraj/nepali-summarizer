@@ -7,10 +7,27 @@ import math
 
 import cupy as cp
 
-from .functional import matmul_weight_grad, stable_softmax
+from .functional import matmul, matmul_weight_grad, stable_softmax, to_compute
 from src.tensor_types import BoolArray, FloatArray
 
+# Σ_j dP_j P_j per attention row, with the products and the sum in float32.
+_row_dot = cp.ReductionKernel(
+    "P d_weights, P p", "float32 row_dot",
+    "(float)d_weights * (float)p", "a + b", "row_dot = a", "0",
+    "attention_row_dot", reduce_type="float",
+)
+
+# softmax backward, dS = P ⊙ (dP - row_dot) · scale, fused into one pass computed in float32
+# (a float16 dP - row_dot loses most of its digits to cancellation).
+_softmax_backward = cp.ElementwiseKernel(
+    "P p, P d_weights, float32 row_dot, float32 scale",
+    "P d_scores",
+    "d_scores = (float)p * ((float)d_weights - row_dot) * scale",
+    "attention_softmax_backward",
+)
+
 # Stand-in for -∞ on padded keys. A finite value keeps softmax NaN-free even if a row is fully masked.
+# float16 cannot hold it (it would become -inf), so fp16 scores use the most negative float16 instead.
 MASK_VALUE = -1e9
 
 
@@ -73,10 +90,11 @@ class MultiHeadAttention:
         Returns:
             Q, K, V: each [B, H, T, Dh], e.g. [4, 8, 512, 64].
         """
-        Q = self._split_heads(X @ self.W_q)  # what each token is looking for
-        K = self._split_heads(X @ self.W_k)  # what each token advertises about itself
-        V = self._split_heads(X @ self.W_v)  # the information each token shares
-        return Q, K, V
+        Q = self._split_heads(matmul(X, to_compute(self.W_q)))  # what each token is looking for
+        K = self._split_heads(matmul(X, to_compute(self.W_k)))  # what each token advertises about itself
+        V = self._split_heads(matmul(X, to_compute(self.W_v)))  # the information each token shares
+        # Contiguous heads let the batched attention matmuls read them without copies.
+        return cp.ascontiguousarray(Q), cp.ascontiguousarray(K), cp.ascontiguousarray(V)
 
     def single_attention(
         self, Q: FloatArray, K: FloatArray, V: FloatArray, attention_mask: BoolArray
@@ -93,18 +111,20 @@ class MultiHeadAttention:
         """
         # 1-2. Similarity of every query with every key, scaled by √Dh = 8 so softmax stays in
         #      a region with useful gradients. [B, H, T, Dh] @ [B, H, Dh, T] -> [B, H, T, T]
-        scores = Q @ K.swapaxes(-1, -2) / math.sqrt(self.head_dim)
+        scores = matmul(Q, K.swapaxes(-1, -2))
+        scores *= 1.0 / math.sqrt(self.head_dim)
 
         # 3. Mask: [B, T] -> [B, 1, 1, T], so every query in every head ignores the same pad keys.
         #    A [B, T, T] (query x key) mask, e.g. the prefix-LM mask, -> [B, 1, T, T] for every head.
         mask = attention_mask[:, None, None, :] if attention_mask.ndim == 2 else attention_mask[:, None, :, :]
-        scores = cp.where(mask, scores, MASK_VALUE)
+        fill = scores.dtype.type(max(MASK_VALUE, float(cp.finfo(scores.dtype).min)))  # -65504 in float16
+        scores = cp.where(mask, scores, fill)
 
         # 4. Softmax over the key axis: each row becomes weights summing to 1.0 (pads get 0.0).
         weights = stable_softmax(scores, axis=-1)
 
         # 5. Weighted sum of values. [B, H, T, T] @ [B, H, T, Dh] -> [B, H, T, Dh]
-        return weights @ V, weights
+        return matmul(weights, V), weights
 
     def multi_head_attentions(self, X: FloatArray, attention_mask: BoolArray) -> FloatArray:
         """Full MHA: project -> attend per head -> concatenate -> W_o.
@@ -119,7 +139,7 @@ class MultiHeadAttention:
         Q, K, V = self.generate_q_k_v_matrices(X)  # each [B, H, T, Dh]
         head_outputs, weights = self.single_attention(Q, K, V, attention_mask)  # [B, H, T, Dh]
         concat = self._merge_heads(head_outputs)  # [B, T, D]
-        output = concat @ self.W_o  # [B, T, D] @ [D, D] -> [B, T, D]
+        output = matmul(concat, to_compute(self.W_o))  # [B, T, D] @ [D, D] -> [B, T, D]
 
         self.cache = {"X": X, "Q": Q, "K": K, "V": V, "weights": weights, "concat": concat}
         return output
@@ -138,20 +158,20 @@ class MultiHeadAttention:
         """
         c = self.cache
         self.grads["W_o"] = matmul_weight_grad(c["concat"], d_out)  # [D, D]
-        d_heads = self._split_heads(d_out @ self.W_o.T)  # [B, H, T, Dh]
+        d_heads = cp.ascontiguousarray(self._split_heads(matmul(d_out, to_compute(self.W_o).T)))  # [B, H, T, Dh]
 
         # out = weights @ V
-        d_weights = d_heads @ c["V"].swapaxes(-1, -2)  # [B, H, T, T]
-        d_V = c["weights"].swapaxes(-1, -2) @ d_heads  # [B, H, T, Dh]
+        d_weights = matmul(d_heads, c["V"].swapaxes(-1, -2))  # [B, H, T, T]
+        d_V = matmul(c["weights"].swapaxes(-1, -2), d_heads)  # [B, H, T, Dh]
 
         # softmax: dS = P ⊙ (dP - Σ_j dP_j P_j). Masked positions have P = 0, so they get 0 gradient.
         p = c["weights"]
-        d_scores = p * (d_weights - cp.sum(d_weights * p, axis=-1, keepdims=True))
-        d_scores /= math.sqrt(self.head_dim)
+        row_dot = _row_dot(d_weights, p, axis=-1, keepdims=True)  # [B, H, T, 1] float32
+        d_scores = _softmax_backward(p, d_weights, row_dot, cp.float32(1.0 / math.sqrt(self.head_dim)))
 
         # scores = Q Kᵀ
-        d_Q = d_scores @ c["K"]  # [B, H, T, Dh]
-        d_K = d_scores.swapaxes(-1, -2) @ c["Q"]  # [B, H, T, Dh]
+        d_Q = matmul(d_scores, c["K"])  # [B, H, T, Dh]
+        d_K = matmul(d_scores.swapaxes(-1, -2), c["Q"])  # [B, H, T, Dh]
 
         # Back from heads to [B, T, D], then through the three input projections.
         d_Q, d_K, d_V = self._merge_heads(d_Q), self._merge_heads(d_K), self._merge_heads(d_V)
@@ -159,7 +179,11 @@ class MultiHeadAttention:
         self.grads["W_q"] = matmul_weight_grad(X, d_Q)
         self.grads["W_k"] = matmul_weight_grad(X, d_K)
         self.grads["W_v"] = matmul_weight_grad(X, d_V)
-        return d_Q @ self.W_q.T + d_K @ self.W_k.T + d_V @ self.W_v.T
+        return (
+            matmul(d_Q, to_compute(self.W_q).T)
+            + matmul(d_K, to_compute(self.W_k).T)
+            + matmul(d_V, to_compute(self.W_v).T)
+        )
 
     def parameters(self) -> dict[str, FloatArray]:
         return {"W_q": self.W_q, "W_k": self.W_k, "W_v": self.W_v, "W_o": self.W_o}

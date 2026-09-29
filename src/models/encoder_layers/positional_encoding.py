@@ -51,8 +51,8 @@ class PositionalEncoding:
             [B, T, D] — each vector now carries "what" (semantics) and "where" (position).
         """
         seq_len = x.shape[1]
-        # PE[:T] is [T, D]; broadcasting adds it to all B sequences.
-        return x + self.positional_encoding_matrix[:seq_len]
+        # PE[:T] is [T, D]; broadcasting adds it to all B sequences (in x's dtype, e.g. float16).
+        return x + self.positional_encoding_matrix[:seq_len].astype(x.dtype, copy=False)
 
     def backward(self, d_out: FloatArray) -> FloatArray:
         """PE is a constant, so the gradient passes straight through to the embeddings."""

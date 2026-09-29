@@ -25,6 +25,7 @@ class ProjectConfig:
     max_grad_norm: float = 1.0
     seed: int = 42
     checkpoint_dir: str = "checkpoints"
+    precision: str = "fp16"  # "fp16" = mixed precision (float32 master weights), or "fp32"
 
     # data
     max_article_length: int = 768
@@ -51,6 +52,16 @@ class ProjectConfig:
         flat["project_name"] = data.get("project", {}).get("name", cls.project_name)
         known = {f.name for f in fields(cls)}
         return cls(**{key: value for key, value in flat.items() if key in known})
+
+    @property
+    def compute_dtype(self):
+        """``cp.float16`` or ``cp.float32``, from ``precision``."""
+        import cupy as cp
+
+        dtypes = {"fp16": cp.float16, "fp32": cp.float32}
+        if self.precision not in dtypes:
+            raise ValueError(f"precision must be one of {sorted(dtypes)}, got {self.precision!r}")
+        return dtypes[self.precision]
 
     def resolve(self, relative: str) -> Path:
         """Turn a config path into an absolute path under the project root."""

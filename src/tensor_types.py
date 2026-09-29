@@ -15,6 +15,6 @@ shapes in comments/docstrings using these symbols (defaults from config/config.y
 
 import cupy as cp
 
-FloatArray = cp.ndarray  # float32 activations, weights and gradients
+FloatArray = cp.ndarray  # float32 weights, gradients and Adam state; float16 activations (mixed precision)
 IntArray = cp.ndarray  # int64 token IDs
 BoolArray = cp.ndarray  # bool attention / loss masks (True = keep)

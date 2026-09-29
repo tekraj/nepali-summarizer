@@ -135,7 +135,7 @@ class TransformerEncoder:
         d_hidden = self.lm_head.backward(d_logits)
         if self._output_mask is not None:
             # Scatter [N, D] back into [B, T, D]; unscored positions receive no direct gradient.
-            full = cp.zeros(self._hidden_shape, dtype=cp.float32)
+            full = cp.zeros(self._hidden_shape, dtype=d_hidden.dtype)
             full[self._output_mask] = d_hidden
             d_hidden = full
 

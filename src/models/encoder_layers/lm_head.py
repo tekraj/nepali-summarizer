@@ -8,7 +8,7 @@ positions during training) and returns [N, V] — much cheaper than scoring all 
 
 import cupy as cp
 
-from .functional import matmul_weight_grad, stable_softmax
+from .functional import matmul, matmul_weight_grad, stable_softmax, to_compute
 from src.tensor_types import FloatArray
 
 
@@ -49,28 +49,31 @@ class LanguageModelingHead:
             x_final: [B, T, D] output of the last EncoderBlock (or [N, D] selected rows).
 
         Returns:
-            logits:        [B, T, V] (or [N, V]) unnormalised scores.
-            probabilities: [B, T, V] (or [N, V]), each row sums to 1.0.
+            logits:        [B, T, V] (or [N, V]) unnormalised scores, in the compute dtype.
+            probabilities: [B, T, V] (or [N, V]) float32, each row sums to 1.0.
         """
-        logits = x_final @ self.W_lm + self.b_lm  # Step 1: un-embedding D -> V
-        probabilities = stable_softmax(logits, axis=-1)  # Step 2: softmax over the vocabulary
+        W_lm = to_compute(self.W_lm)  # float32 master -> float16 copy, kept for backward
+        logits = matmul(x_final, W_lm) + to_compute(self.b_lm)  # Step 1: un-embedding D -> V
+        # Step 2: softmax over the vocabulary, in float32 so the loss sees exact probabilities.
+        probabilities = stable_softmax(logits, axis=-1, out_dtype=cp.float32)
 
-        self.cache = {"x_final": x_final}
+        self.cache = {"x_final": x_final, "W_lm": W_lm}
         return logits, probabilities
 
     def backward(self, d_logits: FloatArray) -> FloatArray:
         """
         Args:
-            d_logits: same shape as the logits, gradient of the loss w.r.t. the logits.
+            d_logits: same shape as the logits, float32 gradient of the (scaled) loss w.r.t. the logits.
 
         Returns:
-            Gradient of ``x_final`` (same shape as ``x_final``).
+            Gradient of ``x_final`` (same shape as ``x_final``), in the compute dtype.
         """
         x_final = self.cache["x_final"]
+        self.grads["b_lm"] = d_logits.reshape(-1, self.vocab_size).sum(axis=0, dtype=cp.float32)  # [V]
+        d_logits = to_compute(d_logits)
         # With tied weights this gradient belongs to E; TransformerEncoder.backward adds it there.
         self.grads["W_lm"] = matmul_weight_grad(x_final, d_logits)  # [D, V]
-        self.grads["b_lm"] = d_logits.reshape(-1, self.vocab_size).sum(axis=0)  # [V]
-        return d_logits @ self.W_lm.T
+        return matmul(d_logits, self.cache["W_lm"].T)
 
     def parameters(self) -> dict[str, FloatArray]:
         if self.tie_weights:
