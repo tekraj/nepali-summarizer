@@ -10,7 +10,7 @@ training:
   # B x 8 x T x T floats per block (fp16: 2 bytes each). B=16 at T=1024 fits a 16 GB T4;
   # use --batch-size 4 on a 6 GB GPU.
   batch_size: 16
-  epochs: 100
+  epochs: 10
   learning_rate: 0.0001
   max_grad_norm: 1.0
   seed: 42
